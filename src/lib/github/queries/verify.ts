@@ -2,19 +2,21 @@ import { graphqlRequest } from "@/lib/github/client";
 import { cached } from "@/lib/github/cache";
 
 /**
- * Step 1 sanity check: confirm the token works and we can read data.
- * Returns the authenticated user plus a handful of their repos.
+ * Auth check: confirm the token works and report what it can see — the
+ * authenticated user, their rate-limit budget, and every organization the token
+ * has visibility into (so the UI can offer them as one-click picks).
  */
 
 export interface VerifyResult {
   login: string;
   name: string | null;
-  /** GraphQL rate-limit budget snapshot, handy for the status bar. */
   rateLimit: {
     limit: number;
     remaining: number;
     resetAt: string;
   };
+  /** Orgs the token can see. Empty usually means the token lacks `read:org`. */
+  organizations: Array<{ login: string; name: string | null }>;
   repos: Array<{
     nameWithOwner: string;
     isPrivate: boolean;
@@ -26,6 +28,9 @@ interface VerifyQueryResponse {
   viewer: {
     login: string;
     name: string | null;
+    organizations: {
+      nodes: Array<{ login: string; name: string | null }>;
+    };
     repositories: {
       nodes: Array<{
         nameWithOwner: string;
@@ -46,6 +51,12 @@ const VERIFY_QUERY = /* GraphQL */ `
     viewer {
       login
       name
+      organizations(first: 100) {
+        nodes {
+          login
+          name
+        }
+      }
       repositories(
         first: 10
         orderBy: { field: PUSHED_AT, direction: DESC }
@@ -75,6 +86,7 @@ export async function verifyToken(): Promise<VerifyResult> {
         login: data.viewer.login,
         name: data.viewer.name,
         rateLimit: data.rateLimit,
+        organizations: data.viewer.organizations.nodes,
         repos: data.viewer.repositories.nodes,
       };
     },

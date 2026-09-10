@@ -86,15 +86,27 @@ Open <http://localhost:3000>. The status bar at the top should show
 curl -s localhost:3000/api/verify | jq
 ```
 
-Then type an org name (or switch to "Specific repos" and paste `owner/name`
-lines) and click **Load repositories**.
+Pick a source in the **Repositories** panel:
 
-You can also deep-link a view:
+| Mode | What it loads |
+|---|---|
+| **My repos** (default) | Every repo your token can see — personal, collaborations, and every org you belong to. Grouped by owner. |
+| **Organization** | Every repo in one org. Orgs your token can see are offered as one-click chips (needs `read:org`). |
+| **Specific** | An explicit list of `owner/name` lines. |
+
+The active source shows as a chip with an **✕ clear** button — that's how you
+reset it (it's also remembered across reloads, so clearing is the way out).
+
+Deep-link a view:
 
 ```
+/?mine=1
 /?org=vercel&weeks=26&staleDays=60
 /?repos=vercel/next.js,facebook/react
 ```
+
+> Loading a big "My repos" list auto-selects only the 12 most recently pushed
+> repos (each card makes one API call per selected repo). Tick more as needed.
 
 ---
 
@@ -210,7 +222,8 @@ Every failure surfaces as a visible message, never a silent failure or a crash:
 | Symptom | Fix |
 |---|---|
 | Setup banner: "token not working" | Check `.env.local` has `GITHUB_TOKEN=`, the token isn't expired, and it has `repo` + `read:org`. Restart `npm run dev` after editing env. |
-| Org loads no repos | The token can't see the org's repos — needs `read:org` (classic) or org membership (fine-grained). |
+| Org not found / no org chips shown | The token can't see that org — it's missing the `read:org` scope (classic) or org access (fine-grained). Regenerate with `read:org`. |
+| Wrong source stuck after reload | The source is saved to localStorage. Use the **✕ clear** button on the source chip. |
 | "still computing stats" on commit/contributor cards | GitHub computes those async on first request for a repo. Wait ~10s and hit **Refresh all**. |
 | PR / issue counts look huge | Public repos with lots of drive-by PRs/issues. The totals are exact; the sampled parts are flagged. |
 | Rate limit hit | Wait for the reset shown in the status bar, or select fewer repos. Caching means normal use won't get close. |

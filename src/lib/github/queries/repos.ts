@@ -5,9 +5,11 @@ import { GitHubApiError } from "@/lib/github/errors";
 import type { Repo, RepoListResult } from "@/lib/github/types";
 
 /**
- * Repo discovery — two modes:
- *   1. by org:   list every repository in an organization (paginated)
- *   2. by list:  resolve an explicit set of "owner/name" strings in one batched query
+ * Repo discovery — three modes:
+ *   1. viewer: every repo the authenticated user is involved in, across all orgs
+ *      (owner / collaborator / org member), paginated
+ *   2. by org: every repository in one organization, paginated
+ *   3. by list: resolve an explicit set of "owner/name" strings in one batched query
  */
 
 // ---- Raw GraphQL node shape (shared by both modes) -------------------------
@@ -59,7 +61,68 @@ function toRepo(node: RepoNode): Repo {
   };
 }
 
-// ---- Mode 1: by org -------------------------------------------------------
+// ---- Mode 1: viewer (everything I'm involved in) -------------------------
+
+interface ViewerReposResponse {
+  viewer: {
+    repositories: Connection<RepoNode>;
+  };
+}
+
+const VIEWER_REPOS_QUERY = /* GraphQL */ `
+  query ViewerRepos($after: String) {
+    viewer {
+      repositories(
+        first: 50
+        after: $after
+        affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+        orderBy: { field: PUSHED_AT, direction: DESC }
+      ) {
+        nodes { ${REPO_FIELDS} }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+`;
+
+/**
+ * Every repo the token's user can touch — personal repos, repos they collaborate
+ * on, and repos in every org they belong to. Paginated; capped at 20 pages
+ * (1000 repos) as a safety valve.
+ */
+export async function listViewerRepos(): Promise<RepoListResult> {
+  return cached(
+    "repos:viewer",
+    async () => {
+      const nodes: RepoNode[] = [];
+      let after: string | null = null;
+
+      for (let page = 0; page < 20; page += 1) {
+        const data: ViewerReposResponse =
+          await graphqlRequest<ViewerReposResponse>(VIEWER_REPOS_QUERY, {
+            after,
+          });
+        const conn = data.viewer.repositories;
+        nodes.push(...conn.nodes);
+        if (!conn.pageInfo.hasNextPage || !conn.pageInfo.endCursor) break;
+        after = conn.pageInfo.endCursor;
+      }
+
+      // De-dupe (a repo can match more than one affiliation) and sort.
+      const seen = new Set<string>();
+      const unique = nodes.filter((n) => {
+        if (seen.has(n.nameWithOwner)) return false;
+        seen.add(n.nameWithOwner);
+        return true;
+      });
+
+      return { org: null, repos: unique.map(toRepo).sort(sortByActivity) };
+    },
+    5 * 60 * 1000,
+  );
+}
+
+// ---- Mode 2: by org -------------------------------------------------------
 
 interface OrgReposResponse {
   organization: {
@@ -115,7 +178,7 @@ export async function listOrgRepos(org: string): Promise<RepoListResult> {
   });
 }
 
-// ---- Mode 2: explicit list ---------------------------------------------------
+// ---- Mode 3: explicit list ---------------------------------------------------
 
 /**
  * Resolve up to ~50 "owner/name" strings in a single request using aliased
