@@ -4,6 +4,7 @@ import { DashboardProvider } from "./DashboardContext";
 import { StatusBar } from "./StatusBar";
 import { RepoSelector } from "./RepoSelector";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
+import { PrHealthCard } from "./cards/PrHealthCard";
 
 /**
  * The dashboard shell.
@@ -36,7 +37,7 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <CommitActivityCard />
-            <PlaceholderCard step={4} name="PR health" />
+            <PrHealthCard />
             <PlaceholderCard step={5} name="Stale branches" />
             <PlaceholderCard step={6} name="Contributor activity" />
             <PlaceholderCard step={7} name="Issue velocity" />

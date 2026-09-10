@@ -96,6 +96,15 @@ export async function graphqlRequest<T>(
     );
   }
 
+  if (res.status === 502 || res.status === 503 || res.status === 504) {
+    // Usually a GraphQL query that was too expensive to resolve in time.
+    throw new GitHubApiError(
+      "NETWORK",
+      `GitHub couldn't resolve the query in time (HTTP ${res.status}). ` +
+        `Try selecting fewer repos at once.`,
+    );
+  }
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new GitHubApiError(
