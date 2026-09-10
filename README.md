@@ -36,20 +36,29 @@ npm install
 
 ### 2. Create a GitHub Personal Access Token
 
-**Classic token** (simplest):
+**Classic token — recommended for a multi-org dashboard:**
 
 1. GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → *Generate new token (classic)*
 2. Select scopes:
    | Scope | Why |
    |---|---|
-   | `repo` | Read private repositories, their PRs, branches, issues. Omit if you only track **public** repos. |
-   | `read:org` | List an organization's repositories. |
+   | `repo` | Read **private** repositories, their PRs, branches, issues. Omit only if you track public repos exclusively. |
+   | `read:org` | List an organization's repositories, and populate the org quick-picks. |
 3. Generate and copy the `ghp_…` value.
 
-**Fine-grained token** (more locked down): pick the target organization, grant it
-these **read-only** repository permissions: *Contents*, *Metadata*,
-*Pull requests*, *Issues*. Organization permission: *Members* (read-only) helps
-with private-repo discovery.
+One classic token spans **everything your account can access** — all your orgs,
+all your private repos.
+
+**Fine-grained token** (more locked down, but limited): a fine-grained token is
+tied to **one owner** (your user *or* a single org) chosen at creation — it can
+**never** span multiple orgs. Grant it repository access + these read-only
+permissions: *Metadata*, *Contents*, *Pull requests*, *Issues*. For an org
+dashboard, create the token **under that org**. For several orgs, use a classic
+token instead.
+
+> GitStream never hides repos by visibility — private repos appear whenever the
+> token can read them. If they're missing, the status bar tells you which
+> scope/permission is the reason.
 
 ### 3. Configure the environment
 

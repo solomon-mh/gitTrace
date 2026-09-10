@@ -74,6 +74,8 @@ export function StatusBar() {
                 limit={info.data.rateLimit.limit}
                 resetAt={info.data.rateLimit.resetAt}
               />
+              <span className="text-ink-subtle">·</span>
+              <TokenScopes data={info.data} />
             </>
           )}
         </div>
@@ -101,6 +103,71 @@ export function StatusBar() {
           </p>
         </div>
       )}
+
+      {info.state === "ok" && <ScopeHint data={info.data} />}
+    </div>
+  );
+}
+
+function TokenScopes({ data }: { data: VerifyResult }) {
+  if (data.tokenScopes == null) {
+    return <span className="text-ink-subtle">fine-grained token</span>;
+  }
+  if (data.tokenScopes.length === 0) {
+    return <span className="text-warn">token has no scopes</span>;
+  }
+  return (
+    <span className="font-mono text-ink-subtle">
+      {data.tokenScopes.join(" ")}
+    </span>
+  );
+}
+
+/**
+ * Explains why private repos / orgs might be missing — the #1 support question.
+ * GitStream never filters by visibility; this is always a token-permission issue.
+ */
+function ScopeHint({ data }: { data: VerifyResult }) {
+  const fineGrained = data.tokenScopes == null;
+
+  if (fineGrained) {
+    // Fine-grained tokens are scoped to ONE owner and can't span orgs.
+    if (data.organizations.length > 0) return null;
+    return (
+      <div className="rounded-lg border border-warn/30 bg-warn/5 px-4 py-2.5 text-xs text-warn">
+        This is a <strong>fine-grained token</strong> — it only sees the one
+        account (user or org) it was created for, and only repos you granted it
+        with <code className="font-mono">Metadata</code> +{" "}
+        <code className="font-mono">Contents: Read</code>. To cover an
+        organization, create the token under that org (or use a{" "}
+        <strong>classic</strong> PAT with{" "}
+        <code className="font-mono">repo</code> +{" "}
+        <code className="font-mono">read:org</code>, which spans everything you
+        can access). Nothing is filtered here — private repos show when the token
+        can read them.
+      </div>
+    );
+  }
+
+  const missing: string[] = [];
+  if (data.canReadPrivate === false)
+    missing.push("`repo` — private repositories");
+  if (data.canReadOrgs === false)
+    missing.push("`read:org` — organization repositories");
+  if (missing.length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-warn/30 bg-warn/5 px-4 py-2.5 text-xs text-warn">
+      Your token is missing scopes:{" "}
+      {missing.map((m, i) => (
+        <span key={m}>
+          {i > 0 && ", "}
+          <code className="font-mono">{m.split(" — ")[0]}</code> ({m.split(" — ")[1]})
+        </span>
+      ))}
+      . Regenerate it (GitHub → Settings → Developer settings → Tokens
+      (classic)), update <code className="font-mono">.env.local</code>, restart.
+      Private repos aren&apos;t filtered — they show when the token can read them.
     </div>
   );
 }
