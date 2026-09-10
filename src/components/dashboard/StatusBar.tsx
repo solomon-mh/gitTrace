@@ -54,10 +54,10 @@ export function StatusBar() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-2 text-xs">
         <div className="flex items-center gap-2">
           {info.state === "loading" && (
-            <span className="text-slate-400">Checking GitHub connection…</span>
+            <span className="text-ink-subtle">Checking GitHub connection…</span>
           )}
           {info.state === "error" && (
             <span className="font-medium text-danger">
@@ -67,8 +67,8 @@ export function StatusBar() {
           {info.state === "ok" && (
             <>
               <span className="inline-block h-2 w-2 rounded-full bg-ok" />
-              <span className="text-slate-600">@{info.data.login}</span>
-              <span className="text-slate-300">·</span>
+              <span className="text-ink-muted">@{info.data.login}</span>
+              <span className="text-ink-subtle">·</span>
               <RateLimit
                 remaining={info.data.rateLimit.remaining}
                 limit={info.data.rateLimit.limit}
@@ -81,14 +81,14 @@ export function StatusBar() {
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="rounded-md border border-slate-200 px-2.5 py-1 font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-md border border-border px-2.5 py-1 font-medium text-ink-muted hover:bg-surface-2 disabled:opacity-50"
         >
           {refreshing ? "Refreshing…" : "Refresh all"}
         </button>
       </div>
 
       {authProblem && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+        <div className="rounded-lg border border-danger/40 bg-danger/5 px-4 py-3 text-sm text-danger">
           <p className="font-semibold">GitHub token not working</p>
           <p className="mt-1 text-danger/90">{info.message}</p>
           <p className="mt-2 text-xs text-danger/80">
@@ -116,7 +116,7 @@ function RateLimit({
 }) {
   const low = remaining < limit * 0.1;
   return (
-    <span className={low ? "font-medium text-warn" : "text-slate-500"}>
+    <span className={low ? "font-medium text-warn" : "text-ink-muted"}>
       rate limit {remaining.toLocaleString()}/{limit.toLocaleString()}
       {low && <> · resets {new Date(resetAt).toLocaleTimeString()}</>}
     </span>

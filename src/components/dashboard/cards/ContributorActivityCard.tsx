@@ -50,19 +50,19 @@ export function ContributorActivityCard() {
       className="md:col-span-2"
       actions={
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1 text-xs text-slate-500">
+          <label className="flex items-center gap-1 text-xs text-ink-muted">
             <input
               type="checkbox"
               checked={excludeBots}
               onChange={(e) => setExcludeBots(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-slate-300"
+              className="h-3.5 w-3.5 rounded border-border"
             />
             hide bots
           </label>
           <select
             value={windowWeeks}
             onChange={(e) => setWindowWeeks(Number(e.target.value))}
-            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
+            className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-ink-muted"
           >
             {WINDOW_OPTIONS.map((w) => (
               <option key={w} value={w}>
@@ -127,10 +127,10 @@ function RepoContributorBlock({ repo }: { repo: RepoContributors }) {
     <div>
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-slate-800">
+          <span className="font-medium text-ink">
             {shortRepo(repo.repo)}
           </span>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-ink-subtle">
             {formatNumber(repo.windowCommits)} commits ·{" "}
             {repo.contributors.length} contributor
             {repo.contributors.length === 1 ? "" : "s"}
@@ -146,20 +146,20 @@ function RepoContributorBlock({ repo }: { repo: RepoContributors }) {
       <ul className="space-y-1.5">
         {shown.map((c) => (
           <li key={c.login} className="flex items-center gap-3 text-sm">
-            <span className="w-32 shrink-0 truncate text-slate-600">
+            <span className="w-32 shrink-0 truncate text-ink-muted">
               @{c.login}
             </span>
-            <span className="relative h-4 flex-1 overflow-hidden rounded bg-slate-100">
+            <span className="relative h-4 flex-1 overflow-hidden rounded bg-surface-2">
               <span
                 className={`absolute inset-y-0 left-0 rounded ${
-                  c.share > BUS_FACTOR_SHARE ? "bg-danger/70" : "bg-blue-500/70"
+                  c.share > BUS_FACTOR_SHARE ? "bg-danger/70" : "bg-accent/70"
                 }`}
                 style={{ width: `${Math.max(2, c.share * 100)}%` }}
               />
             </span>
-            <span className="w-24 shrink-0 text-right tabular-nums text-slate-500">
+            <span className="w-24 shrink-0 text-right tabular-nums text-ink-muted">
               {formatNumber(c.commits)}{" "}
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-ink-subtle">
                 ({(c.share * 100).toFixed(0)}%)
               </span>
             </span>
@@ -171,7 +171,7 @@ function RepoContributorBlock({ repo }: { repo: RepoContributors }) {
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="mt-1.5 text-xs text-slate-500 hover:text-slate-700"
+          className="mt-1.5 text-xs text-ink-muted hover:text-ink"
         >
           + {hidden} more contributor{hidden === 1 ? "" : "s"}
         </button>
@@ -180,7 +180,7 @@ function RepoContributorBlock({ repo }: { repo: RepoContributors }) {
         <button
           type="button"
           onClick={() => setExpanded(false)}
-          className="mt-1.5 text-xs text-slate-500 hover:text-slate-700"
+          className="mt-1.5 text-xs text-ink-muted hover:text-ink"
         >
           show less
         </button>

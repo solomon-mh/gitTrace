@@ -12,7 +12,7 @@ through a dozen GitHub tabs.
 | | |
 |---|---|
 | Framework | Next.js 16 (App Router) + TypeScript |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS, semantic colour tokens, **dark by default** |
 | Charts | Recharts 3 |
 | Data | GitHub **GraphQL v4** (REST only for the stats endpoints GraphQL doesn't expose) |
 | Auth | A GitHub Personal Access Token, read **server-side only** from `GITHUB_TOKEN` |
@@ -150,6 +150,8 @@ src/
       useCardData.ts             shared fetch lifecycle for cards
       cards/                     one component per metric card
     ui/                          Card shell + Loading/Empty/Error/Skeleton states
+
+  app/globals.css              theme tokens (dark :root, light :root.light)
 
   lib/
     api/

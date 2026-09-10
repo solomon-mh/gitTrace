@@ -19,15 +19,15 @@ export function Card({
 }) {
   return (
     <section
-      className={`flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
+      className={`flex flex-col rounded-xl border border-border bg-surface shadow-sm ${className}`}
     >
-      <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+      <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
             {title}
           </h2>
           {subtitle && (
-            <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-ink-subtle">{subtitle}</p>
           )}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}

@@ -138,7 +138,7 @@ export function RepoSelector() {
       subtitle={activeLabel ?? "Choose where to pull repos from"}
       actions={
         repos.length > 0 && (
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-ink-subtle">
             {selected.length}/{repos.length}
           </span>
         )
@@ -146,14 +146,14 @@ export function RepoSelector() {
     >
       {/* --- active source chip --- */}
       {activeLabel && (
-        <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-xs">
-          <span className="truncate font-medium text-slate-600">
+        <div className="mb-3 flex items-center justify-between rounded-lg bg-surface-2 px-3 py-1.5 text-xs">
+          <span className="truncate font-medium text-ink-muted">
             {activeLabel}
           </span>
           <button
             type="button"
             onClick={clearSource}
-            className="ml-2 shrink-0 rounded px-1.5 py-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+            className="ml-2 shrink-0 rounded px-1.5 py-0.5 text-ink-subtle hover:bg-border hover:text-ink"
           >
             ✕ clear
           </button>
@@ -162,7 +162,7 @@ export function RepoSelector() {
 
       {/* --- source picker --- */}
       <form onSubmit={submit} className="space-y-3">
-        <div className="grid grid-cols-3 gap-1 rounded-lg bg-slate-100 p-1 text-xs font-medium">
+        <div className="grid grid-cols-3 gap-1 rounded-lg bg-surface-2 p-1 text-xs font-medium">
           {(
             [
               ["viewer", "My repos"],
@@ -175,7 +175,7 @@ export function RepoSelector() {
               type="button"
               onClick={() => setMode(m)}
               className={`rounded-md px-2 py-1.5 ${
-                mode === m ? "bg-white shadow-sm" : "text-slate-500"
+                mode === m ? "bg-surface shadow-sm" : "text-ink-muted"
               }`}
             >
               {label}
@@ -184,7 +184,7 @@ export function RepoSelector() {
         </div>
 
         {mode === "viewer" && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-muted">
             Every repo your token can see — personal, collaborations, and every
             org you belong to.
           </p>
@@ -195,7 +195,7 @@ export function RepoSelector() {
               value={orgInput}
               onChange={(e) => setOrgInput(e.target.value)}
               placeholder="e.g. vercel"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-accent"
             />
             {orgs.length > 0 ? (
               <div className="flex flex-wrap gap-1">
@@ -207,14 +207,14 @@ export function RepoSelector() {
                       setOrgInput(o.login);
                       loadOrg(o.login);
                     }}
-                    className="rounded-md border border-slate-200 px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-50"
+                    className="rounded-md border border-border px-2 py-0.5 text-xs text-ink-muted hover:bg-surface-2"
                   >
                     {o.login}
                   </button>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-ink-subtle">
                 Your token can&apos;t see any orgs — it may be missing the{" "}
                 <code className="font-mono">read:org</code> scope.
               </p>
@@ -227,13 +227,13 @@ export function RepoSelector() {
             onChange={(e) => setReposInput(e.target.value)}
             placeholder={"owner/repo, one per line\nvercel/next.js\nfacebook/react"}
             rows={3}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-slate-500"
+            className="w-full rounded-lg border border-border px-3 py-2 font-mono text-xs outline-none focus:border-accent"
           />
         )}
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+          className="w-full rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover"
         >
           {reposStatus.state === "loading"
             ? "Loading…"
@@ -269,7 +269,7 @@ export function RepoSelector() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Filter…"
-                className="flex-1 rounded-md border border-slate-200 px-2 py-1 text-xs outline-none focus:border-slate-400"
+                className="flex-1 rounded-md border border-border px-2 py-1 text-xs outline-none focus:border-accent"
               />
               <button
                 type="button"
@@ -286,61 +286,61 @@ export function RepoSelector() {
                         )
                     : selectAll
                 }
-                className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                className="rounded-md border border-border px-2 py-1 text-xs text-ink-muted hover:bg-surface-2"
               >
                 {filter ? "+ shown" : "All"}
               </button>
               <button
                 type="button"
                 onClick={clearSelection}
-                className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                className="rounded-md border border-border px-2 py-1 text-xs text-ink-muted hover:bg-surface-2"
               >
                 None
               </button>
             </div>
 
             {collabCount > 0 && (
-              <label className="mb-2 flex items-center gap-1.5 text-xs text-slate-500">
+              <label className="mb-2 flex items-center gap-1.5 text-xs text-ink-muted">
                 <input
                   type="checkbox"
                   checked={ownedOnly}
                   onChange={(e) => setOwnedOnly(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-slate-300"
+                  className="h-3.5 w-3.5 rounded border-border"
                 />
                 Hide {collabCount} repo(s) you only collaborate on
               </label>
             )}
 
-            <div className="max-h-80 overflow-y-auto rounded-lg border border-slate-100">
+            <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
               {grouped.map(([owner, ownerRepos]) => (
                 <div key={owner}>
                   {grouped.length > 1 && (
-                    <div className="sticky top-0 flex items-center justify-between bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    <div className="sticky top-0 flex items-center justify-between bg-surface-2 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-subtle">
                       <span>{owner}</span>
                       <span>{ownerRepos.length}</span>
                     </div>
                   )}
-                  <ul className="divide-y divide-slate-100">
+                  <ul className="divide-y divide-border">
                     {ownerRepos.map((r) => {
                       const isSelected = selected.includes(r.nameWithOwner);
                       return (
                         <li key={r.nameWithOwner}>
-                          <label className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-slate-50">
+                          <label className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-surface-2">
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => toggleRepo(r.nameWithOwner)}
-                              className="h-4 w-4 rounded border-slate-300"
+                              className="h-4 w-4 rounded border-border"
                             />
                             <span className="flex-1 truncate">
                               <span className="font-medium">{r.name}</span>
                               {grouped.length === 1 && (
-                                <span className="ml-1 text-xs text-slate-400">
+                                <span className="ml-1 text-xs text-ink-subtle">
                                   {r.owner}
                                 </span>
                               )}
                               {!isOwned(r) && (
-                                <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] uppercase text-amber-700">
+                                <span className="ml-2 rounded bg-warn/15 px-1.5 py-0.5 text-[10px] uppercase text-warn">
                                   {r.viewerPermission === "READ" ||
                                   r.viewerPermission === "TRIAGE" ||
                                   r.viewerPermission == null
@@ -349,17 +349,17 @@ export function RepoSelector() {
                                 </span>
                               )}
                               {r.isPrivate && (
-                                <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
+                                <span className="ml-1 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-ink-muted">
                                   private
                                 </span>
                               )}
                               {r.isArchived && (
-                                <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
+                                <span className="ml-1 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-ink-muted">
                                   archived
                                 </span>
                               )}
                             </span>
-                            <span className="shrink-0 text-xs text-slate-400">
+                            <span className="shrink-0 text-xs text-ink-subtle">
                               {r.pushedAt ? timeAgo(r.pushedAt) : "—"}
                             </span>
                           </label>
@@ -370,13 +370,13 @@ export function RepoSelector() {
                 </div>
               ))}
               {visible.length === 0 && (
-                <p className="px-3 py-4 text-center text-xs text-slate-400">
+                <p className="px-3 py-4 text-center text-xs text-ink-subtle">
                   No repos match “{filter}”.
                 </p>
               )}
             </div>
 
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-ink-subtle">
               {selectedRepos.length === 0
                 ? "Select at least one repo — the cards below follow this selection."
                 : `Cards below show data for ${selectedRepos.length} repo(s).`}

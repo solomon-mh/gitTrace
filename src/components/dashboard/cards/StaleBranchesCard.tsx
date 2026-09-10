@@ -60,24 +60,24 @@ export function StaleBranchesCard() {
       actions={
         <div className="flex items-center gap-2">
           {data && data.branches.length > 0 && (
-            <label className="flex items-center gap-1 text-xs text-slate-500">
+            <label className="flex items-center gap-1 text-xs text-ink-muted">
               <input
                 type="checkbox"
                 checked={showAll}
                 onChange={(e) => setShowAll(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-slate-300"
+                className="h-3.5 w-3.5 rounded border-border"
               />
               show all
             </label>
           )}
-          <div className="flex rounded-md bg-slate-100 p-0.5 text-xs font-medium">
+          <div className="flex rounded-md bg-surface-2 p-0.5 text-xs font-medium">
             {THRESHOLDS.map((d) => (
               <button
                 key={d}
                 type="button"
                 onClick={() => setStaleDays(d)}
                 className={`rounded px-2 py-1 ${
-                  staleDays === d ? "bg-white shadow-sm" : "text-slate-500"
+                  staleDays === d ? "bg-surface shadow-sm" : "text-ink-muted"
                 }`}
               >
                 {d}d
@@ -110,7 +110,7 @@ export function StaleBranchesCard() {
           ) : (
             <div className="max-h-[420px] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-white text-left text-xs uppercase tracking-wide text-slate-400">
+                <thead className="sticky top-0 bg-surface text-left text-xs uppercase tracking-wide text-ink-subtle">
                   <tr>
                     <th className="py-2 pr-2 font-medium">Idle</th>
                     <th className="py-2 pr-2 font-medium">Branch</th>
@@ -123,7 +123,7 @@ export function StaleBranchesCard() {
                     <th className="py-2 font-medium">Author</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {rows.map((b) => (
                     <BranchRow key={`${b.repo}:${b.name}`} b={b} />
                   ))}
@@ -132,7 +132,7 @@ export function StaleBranchesCard() {
             </div>
           )}
 
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-ink-subtle">
             Showing {rows.length} branch(es).
             {data.truncatedRepos.length > 0 && (
               <>
@@ -151,20 +151,20 @@ export function StaleBranchesCard() {
 function BranchRow({ b }: { b: BranchInfo }) {
   return (
     <tr
-      className={`align-top hover:bg-slate-50 ${
-        b.isDefault ? "text-slate-400" : ""
+      className={`align-top hover:bg-surface-2 ${
+        b.isDefault ? "text-ink-subtle" : ""
       }`}
     >
       <td className="py-2 pr-2">
         <span
           className={`inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium tabular-nums ${
             b.isDefault
-              ? "bg-slate-100 text-slate-400"
+              ? "bg-surface-2 text-ink-subtle"
               : b.ageDays > 90
                 ? "bg-danger/10 text-danger"
                 : b.isStale
                   ? "bg-warn/10 text-warn"
-                  : "bg-slate-100 text-slate-500"
+                  : "bg-surface-2 text-ink-muted"
           }`}
         >
           {Number.isFinite(b.ageDays) ? `${b.ageDays}d` : "—"}
@@ -173,18 +173,18 @@ function BranchRow({ b }: { b: BranchInfo }) {
       <td className="py-2 pr-2">
         <span className="font-mono text-[13px]">{b.name}</span>
         {b.isDefault && (
-          <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-400">
+          <span className="ml-2 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-ink-subtle">
             default
           </span>
         )}
       </td>
-      <td className="hidden py-2 pr-2 text-slate-500 sm:table-cell">
+      <td className="hidden py-2 pr-2 text-ink-muted sm:table-cell">
         {shortRepo(b.repo)}
       </td>
-      <td className="hidden py-2 pr-2 text-slate-500 md:table-cell">
+      <td className="hidden py-2 pr-2 text-ink-muted md:table-cell">
         {b.lastCommitDate ? shortDate(b.lastCommitDate) : "—"}
       </td>
-      <td className="py-2 text-slate-500">
+      <td className="py-2 text-ink-muted">
         {b.lastCommitLogin
           ? `@${b.lastCommitLogin}`
           : (b.lastCommitAuthor ?? "—")}

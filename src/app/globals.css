@@ -2,11 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens as space-separated RGB channels (so Tailwind's `/opacity`
+ * modifier works). GitStream is dark by default (:root). Adding `light` to
+ * <html> flips every token — nothing toggles it today, but the switch is
+ * one line away.
+ */
 :root {
+  color-scheme: dark;
+
+  --canvas: 12 13 16;
+  --surface: 22 24 29;
+  --surface-2: 30 33 40;
+  --border-color: 42 46 55;
+
+  --ink: 230 232 235;
+  --ink-muted: 154 161 172;
+  --ink-subtle: 118 126 138;
+
+  --accent: 59 130 246;
+  --accent-hover: 37 99 235;
+
+  --ok: 63 185 80;
+  --warn: 210 153 34;
+  --danger: 248 81 73;
+}
+
+:root.light {
   color-scheme: light;
+
+  --canvas: 246 247 249;
+  --surface: 255 255 255;
+  --surface-2: 241 243 245;
+  --border-color: 227 230 234;
+
+  --ink: 15 23 42;
+  --ink-muted: 75 85 99;
+  --ink-subtle: 148 163 184;
+
+  --accent: 37 99 235;
+  --accent-hover: 29 78 216;
+
+  --ok: 22 163 74;
+  --warn: 180 83 9;
+  --danger: 220 38 38;
 }
 
 body {
-  background: #f8fafc;
-  color: #0f172a;
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+}
+
+/* Keep the Recharts hover cursor subtle on a dark surface. */
+.recharts-tooltip-cursor {
+  fill: rgb(var(--ink) / 0.06);
+}
+.recharts-cartesian-grid line {
+  stroke: rgb(var(--border-color));
 }

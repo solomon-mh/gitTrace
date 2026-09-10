@@ -54,7 +54,7 @@ export function IssueVelocityCard() {
         <select
           value={windowWeeks}
           onChange={(e) => setWindowWeeks(Number(e.target.value))}
-          className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
+          className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-ink-muted"
         >
           {WINDOW_OPTIONS.map((wk) => (
             <option key={wk} value={wk}>
@@ -179,7 +179,7 @@ function IssueVelocityBody({ data }: { data: IssueVelocityResult }) {
       </div>
 
       {data.truncatedRepos.length > 0 && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-ink-subtle">
           High issue volume in {data.truncatedRepos.map(shortRepo).join(", ")} —
           the totals above are exact, but the chart and avg-time-to-close use the
           100 most recent issues per direction, so earlier weeks are undercounted.
@@ -199,14 +199,14 @@ function Stat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-      <div className="text-lg font-semibold tabular-nums text-slate-900">
+    <div className="rounded-lg border border-border bg-surface-2 px-3 py-2">
+      <div className="text-lg font-semibold tabular-nums text-ink">
         {value}
       </div>
-      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+      <div className="text-[11px] uppercase tracking-wide text-ink-subtle">
         {label}
       </div>
-      {hint && <div className="text-[10px] text-slate-400">{hint}</div>}
+      {hint && <div className="text-[10px] text-ink-subtle">{hint}</div>}
     </div>
   );
 }

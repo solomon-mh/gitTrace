@@ -56,7 +56,7 @@ export function PrHealthCard() {
       actions={
         data &&
         data.totalOpen > 0 && (
-          <div className="flex rounded-md bg-slate-100 p-0.5 text-xs font-medium">
+          <div className="flex rounded-md bg-surface-2 p-0.5 text-xs font-medium">
             {(
               [
                 ["all", "All"],
@@ -69,7 +69,7 @@ export function PrHealthCard() {
                 type="button"
                 onClick={() => setFilter(key)}
                 className={`rounded px-2 py-1 ${
-                  filter === key ? "bg-white shadow-sm" : "text-slate-500"
+                  filter === key ? "bg-surface shadow-sm" : "text-ink-muted"
                 }`}
               >
                 {label}
@@ -102,7 +102,7 @@ export function PrHealthCard() {
           ) : (
             <div className="max-h-[420px] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-white text-left text-xs uppercase tracking-wide text-slate-400">
+                <thead className="sticky top-0 bg-surface text-left text-xs uppercase tracking-wide text-ink-subtle">
                   <tr>
                     <th className="py-2 pr-2 font-medium">Age</th>
                     <th className="py-2 pr-2 font-medium">PR</th>
@@ -115,7 +115,7 @@ export function PrHealthCard() {
                     <th className="py-2 font-medium">Opened</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {rows.map((pr) => (
                     <PrRow key={`${pr.repo}#${pr.number}`} pr={pr} />
                   ))}
@@ -124,7 +124,7 @@ export function PrHealthCard() {
             </div>
           )}
 
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-ink-subtle">
             Showing {rows.length} of {data.totalOpen} open PR(s) across{" "}
             {data.byRepo.filter((r) => r.open > 0).length} repo(s).
             {data.truncatedRepos.length > 0 && (
@@ -143,7 +143,7 @@ export function PrHealthCard() {
 
 function PrRow({ pr }: { pr: OpenPR }) {
   return (
-    <tr className="align-top hover:bg-slate-50">
+    <tr className="align-top hover:bg-surface-2">
       <td className="py-2 pr-2">
         <AgeBadge days={pr.ageDays} stale={pr.isStale} />
       </td>
@@ -152,13 +152,13 @@ function PrRow({ pr }: { pr: OpenPR }) {
           href={pr.url}
           target="_blank"
           rel="noreferrer"
-          className="font-medium text-slate-800 hover:text-blue-600 hover:underline"
+          className="font-medium text-ink hover:text-accent hover:underline"
         >
-          <span className="text-slate-400">#{pr.number}</span> {pr.title}
+          <span className="text-ink-subtle">#{pr.number}</span> {pr.title}
         </a>
-        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
+        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-ink-subtle">
           {pr.isDraft && (
-            <span className="rounded bg-slate-100 px-1.5 py-0.5 uppercase text-slate-500">
+            <span className="rounded bg-surface-2 px-1.5 py-0.5 uppercase text-ink-muted">
               draft
             </span>
           )}
@@ -176,13 +176,13 @@ function PrRow({ pr }: { pr: OpenPR }) {
           <span className="sm:hidden">· {shortRepo(pr.repo)}</span>
         </div>
       </td>
-      <td className="hidden py-2 pr-2 text-slate-500 sm:table-cell">
+      <td className="hidden py-2 pr-2 text-ink-muted sm:table-cell">
         {shortRepo(pr.repo)}
       </td>
-      <td className="hidden py-2 pr-2 text-slate-500 md:table-cell">
+      <td className="hidden py-2 pr-2 text-ink-muted md:table-cell">
         {pr.author ? `@${pr.author}` : "—"}
       </td>
-      <td className="py-2 text-slate-500">{shortDate(pr.createdAt)}</td>
+      <td className="py-2 text-ink-muted">{shortDate(pr.createdAt)}</td>
     </tr>
   );
 }
@@ -192,7 +192,7 @@ function AgeBadge({ days, stale }: { days: number; stale: boolean }) {
     ? "bg-danger/10 text-danger"
     : days >= 7
       ? "bg-warn/10 text-warn"
-      : "bg-slate-100 text-slate-500";
+      : "bg-surface-2 text-ink-muted";
   return (
     <span
       className={`inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium tabular-nums ${tone}`}

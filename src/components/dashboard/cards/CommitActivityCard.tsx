@@ -21,6 +21,7 @@ import {
   axisProps,
   gridProps,
   MAX_SERIES,
+  MUTED_SERIES,
   NO_ANIM,
   PRIMARY_HUE,
   SERIES_COLORS,
@@ -61,7 +62,7 @@ export function CommitActivityCard() {
           <select
             value={windowWeeks}
             onChange={(e) => setWindowWeeks(Number(e.target.value))}
-            className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
+            className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-ink-muted"
           >
             {WINDOW_OPTIONS.map((w) => (
               <option key={w} value={w}>
@@ -95,14 +96,14 @@ function ViewToggle({
   onChange: (v: "aggregate" | "per-repo") => void;
 }) {
   return (
-    <div className="flex rounded-md bg-slate-100 p-0.5 text-xs font-medium">
+    <div className="flex rounded-md bg-surface-2 p-0.5 text-xs font-medium">
       {(["aggregate", "per-repo"] as const).map((v) => (
         <button
           key={v}
           type="button"
           onClick={() => onChange(v)}
           className={`rounded px-2 py-1 ${
-            view === v ? "bg-white shadow-sm" : "text-slate-500"
+            view === v ? "bg-surface shadow-sm" : "text-ink-muted"
           }`}
         >
           {v === "aggregate" ? "Aggregate" : "Per repo"}
@@ -230,7 +231,7 @@ function CommitActivityBody({
                   dataKey={key}
                   stroke={
                     key === "Other"
-                      ? "#94a3b8"
+                      ? MUTED_SERIES
                       : SERIES_COLORS[i % SERIES_COLORS.length]
                   }
                   strokeWidth={2}
@@ -249,7 +250,7 @@ function CommitActivityBody({
         {data.totals.map((t, i) => (
           <li
             key={t.repo}
-            className="flex items-center justify-between border-b border-slate-50 py-1"
+            className="flex items-center justify-between border-b border-border py-1"
           >
             <span className="flex items-center gap-1.5 truncate">
               <span
@@ -258,17 +259,17 @@ function CommitActivityBody({
                   background:
                     i < MAX_SERIES
                       ? SERIES_COLORS[i % SERIES_COLORS.length]
-                      : "#94a3b8",
+                      : MUTED_SERIES,
                 }}
               />
-              <span className="truncate text-slate-600">{shortRepo(t.repo)}</span>
+              <span className="truncate text-ink-muted">{shortRepo(t.repo)}</span>
             </span>
-            <span className="font-medium text-slate-900">
+            <span className="font-medium text-ink">
               {formatNumber(t.total)}
             </span>
           </li>
         ))}
-        <li className="flex items-center justify-between py-1 text-slate-500 sm:col-span-2">
+        <li className="flex items-center justify-between py-1 text-ink-muted sm:col-span-2">
           <span>Total</span>
           <span className="font-semibold">{formatNumber(totalCommits)}</span>
         </li>
