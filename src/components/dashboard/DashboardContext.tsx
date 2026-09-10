@@ -1,0 +1,255 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { apiGet, describeError } from "@/lib/api/client";
+import type { Repo, RepoListResult } from "@/lib/github/types";
+
+/**
+ * Dashboard-wide state shared by every card:
+ *   - which repos are loaded (the org / explicit list the user picked)
+ *   - which of those repos are currently selected (the filter every card obeys)
+ *   - the analysis time window and the stale-branch threshold
+ *   - a refresh nonce that forces all cards to refetch
+ *
+ * Persisted to localStorage so a reload keeps your view.
+ */
+
+export type RepoSource =
+  | { type: "org"; value: string }
+  | { type: "repos"; value: string[] };
+
+type ReposStatus =
+  | { state: "idle" }
+  | { state: "loading" }
+  | { state: "error"; message: string }
+  | { state: "ok" };
+
+interface DashboardState {
+  source: RepoSource | null;
+  repos: Repo[];
+  reposStatus: ReposStatus;
+  /** nameWithOwner of every currently-selected repo. */
+  selected: string[];
+  /** Analysis window in weeks (commit activity, contributors, issues). */
+  windowWeeks: number;
+  /** Stale-branch threshold in days (30 / 60 / 90 or custom). */
+  staleDays: number;
+  /** Bump to force every card to refetch. */
+  refreshNonce: number;
+}
+
+interface DashboardApi extends DashboardState {
+  /** Repos filtered to the current selection — what cards should render. */
+  selectedRepos: Repo[];
+  loadOrg: (org: string) => void;
+  loadRepoList: (specs: string[]) => void;
+  toggleRepo: (nameWithOwner: string) => void;
+  setSelected: (nameWithOwner: string[]) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  setWindowWeeks: (n: number) => void;
+  setStaleDays: (n: number) => void;
+  refreshAll: () => void;
+}
+
+const DashboardContext = createContext<DashboardApi | null>(null);
+
+const STORAGE_KEY = "gitstream:v1";
+
+interface Persisted {
+  source: RepoSource | null;
+  selected: string[];
+  windowWeeks: number;
+  staleDays: number;
+}
+
+function loadPersisted(): Persisted | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Persisted) : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePersisted(p: Persisted) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  } catch {
+    /* private mode / quota — non-fatal */
+  }
+}
+
+export function DashboardProvider({
+  children,
+  defaultOrg,
+}: {
+  children: React.ReactNode;
+  defaultOrg?: string;
+}) {
+  const [source, setSource] = useState<RepoSource | null>(null);
+  const [repos, setRepos] = useState<Repo[]>([]);
+  const [reposStatus, setReposStatus] = useState<ReposStatus>({ state: "idle" });
+  const [selected, setSelectedState] = useState<string[]>([]);
+  const [windowWeeks, setWindowWeeksState] = useState(12);
+  const [staleDays, setStaleDaysState] = useState(30);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+
+  // Track whether the current selection was set by the user, so that reloading
+  // a repo list doesn't stomp an explicit choice.
+  const selectionTouched = useRef(false);
+  const hydrated = useRef(false);
+
+  // --- hydrate from localStorage (once) -----------------------------------
+  useEffect(() => {
+    const p = loadPersisted();
+    if (p) {
+      if (p.selected?.length) {
+        setSelectedState(p.selected);
+        selectionTouched.current = true;
+      }
+      if (p.windowWeeks) setWindowWeeksState(p.windowWeeks);
+      if (p.staleDays) setStaleDaysState(p.staleDays);
+      if (p.source) {
+        setSource(p.source);
+      }
+    } else if (defaultOrg) {
+      setSource({ type: "org", value: defaultOrg });
+    }
+    hydrated.current = true;
+  }, [defaultOrg]);
+
+  // --- fetch repos whenever `source` changes ------------------------------
+  useEffect(() => {
+    if (!source) return;
+    let cancelled = false;
+    setReposStatus({ state: "loading" });
+
+    const query =
+      source.type === "org"
+        ? `?org=${encodeURIComponent(source.value)}`
+        : `?repos=${encodeURIComponent(source.value.join(","))}`;
+
+    apiGet<RepoListResult>(`/api/repos${query}`)
+      .then((res) => {
+        if (cancelled) return;
+        setRepos(res.repos);
+        setReposStatus({ state: "ok" });
+        // Default selection = all non-archived repos, unless the user already chose.
+        if (!selectionTouched.current) {
+          setSelectedState(
+            res.repos.filter((r) => !r.isArchived).map((r) => r.nameWithOwner),
+          );
+        } else {
+          // Keep only still-present repos.
+          setSelectedState((prev) =>
+            prev.filter((n) =>
+              res.repos.some((r) => r.nameWithOwner === n),
+            ),
+          );
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setRepos([]);
+        setReposStatus({ state: "error", message: describeError(err) });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [source, refreshNonce]);
+
+  // --- persist on change --------------------------------------------------
+  useEffect(() => {
+    if (!hydrated.current) return;
+    savePersisted({ source, selected, windowWeeks, staleDays });
+  }, [source, selected, windowWeeks, staleDays]);
+
+  // --- actions -----------------------------------------------------------
+  const loadOrg = useCallback((org: string) => {
+    selectionTouched.current = false;
+    setSource({ type: "org", value: org.trim() });
+  }, []);
+
+  const loadRepoList = useCallback((specs: string[]) => {
+    selectionTouched.current = false;
+    setSource({
+      type: "repos",
+      value: specs.map((s) => s.trim()).filter(Boolean),
+    });
+  }, []);
+
+  const setSelected = useCallback((next: string[]) => {
+    selectionTouched.current = true;
+    setSelectedState(next);
+  }, []);
+
+  const toggleRepo = useCallback((nameWithOwner: string) => {
+    selectionTouched.current = true;
+    setSelectedState((prev) =>
+      prev.includes(nameWithOwner)
+        ? prev.filter((n) => n !== nameWithOwner)
+        : [...prev, nameWithOwner],
+    );
+  }, []);
+
+  const selectAll = useCallback(() => {
+    selectionTouched.current = true;
+    setSelectedState(repos.map((r) => r.nameWithOwner));
+  }, [repos]);
+
+  const clearSelection = useCallback(() => {
+    selectionTouched.current = true;
+    setSelectedState([]);
+  }, []);
+
+  const refreshAll = useCallback(() => setRefreshNonce((n) => n + 1), []);
+
+  const selectedRepos = useMemo(
+    () => repos.filter((r) => selected.includes(r.nameWithOwner)),
+    [repos, selected],
+  );
+
+  const value: DashboardApi = {
+    source,
+    repos,
+    reposStatus,
+    selected,
+    windowWeeks,
+    staleDays,
+    refreshNonce,
+    selectedRepos,
+    loadOrg,
+    loadRepoList,
+    toggleRepo,
+    setSelected,
+    selectAll,
+    clearSelection,
+    setWindowWeeks: setWindowWeeksState,
+    setStaleDays: setStaleDaysState,
+    refreshAll,
+  };
+
+  return (
+    <DashboardContext.Provider value={value}>
+      {children}
+    </DashboardContext.Provider>
+  );
+}
+
+export function useDashboard(): DashboardApi {
+  const ctx = useContext(DashboardContext);
+  if (!ctx)
+    throw new Error("useDashboard must be used within <DashboardProvider>");
+  return ctx;
+}
