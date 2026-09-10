@@ -5,6 +5,7 @@ import { StatusBar } from "./StatusBar";
 import { RepoSelector } from "./RepoSelector";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
+import { StaleBranchesCard } from "./cards/StaleBranchesCard";
 
 /**
  * The dashboard shell.
@@ -38,7 +39,7 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
           <div className="grid gap-4 md:grid-cols-2">
             <CommitActivityCard />
             <PrHealthCard />
-            <PlaceholderCard step={5} name="Stale branches" />
+            <StaleBranchesCard />
             <PlaceholderCard step={6} name="Contributor activity" />
             <PlaceholderCard step={7} name="Issue velocity" />
           </div>
