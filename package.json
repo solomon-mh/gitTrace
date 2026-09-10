@@ -1,0 +1,26 @@
+{
+  "name": "gitstream",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.3.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.10",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "10.4.19",
+    "postcss": "^8.5.28",
+    "tailwindcss": "3.4.6",
+    "typescript": "5.5.3"
+  }
+}

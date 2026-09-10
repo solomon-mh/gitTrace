@@ -1,0 +1,1 @@
+A web app (Next.js, since that's your comfort zone) that connects to the GitHub API and gives you a single-page view of how healthy your org's repos actually are — instead of clicking through 10 tabs on github.com to piece it together.
