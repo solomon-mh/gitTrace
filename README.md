@@ -157,11 +157,14 @@ src/
     layout.tsx  page.tsx  error.tsx  not-found.tsx
 
   components/
+    Logo.tsx                     brand mark (flowing currents + commit node)
     dashboard/
-      Dashboard.tsx              shell: status bar + selector + card grid
+      Dashboard.tsx              app shell: sidebar + top bar + card grid
       DashboardContext.tsx       shared state (source, selection, window, refresh)
-      StatusBar.tsx              auth identity, rate limit, "Refresh all", setup banner
-      RepoSelector.tsx           org / repo-list input + checkable repo list
+      RepoSidebar.tsx            left rail: logo + source picker + checkable repo list
+      TopBar.tsx                 main-column header: identity, rate limit, token, refresh
+      ScopeHint.tsx              "why are repos missing" banner (token permissions)
+      useVerify.ts               shared /api/verify fetch
       useCardData.ts             shared fetch lifecycle for cards
       cards/                     one component per metric card
     ui/                          Card shell + Loading/Empty/Error/Skeleton states
