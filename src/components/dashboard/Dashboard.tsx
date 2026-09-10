@@ -3,6 +3,7 @@
 import { DashboardProvider } from "./DashboardContext";
 import { StatusBar } from "./StatusBar";
 import { RepoSelector } from "./RepoSelector";
+import { Logo } from "@/components/Logo";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
 import { StaleBranchesCard } from "./cards/StaleBranchesCard";
@@ -23,26 +24,11 @@ import { IssueVelocityCard } from "./cards/IssueVelocityCard";
 export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
   return (
     <DashboardProvider defaultOrg={defaultOrg}>
-      <div className="min-h-screen">
-        <header className="sticky top-0 z-20 border-b border-border bg-canvas/80 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center gap-2.5 px-4 py-3 sm:px-6">
-            <span
-              aria-hidden
-              className="grid h-7 w-7 place-items-center rounded-lg bg-accent/15 text-accent"
-            >
-              {/* simple activity glyph */}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 12h4l3 8 4-16 3 8h4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <h1 className="text-base font-semibold tracking-tight">GitStream</h1>
-            <span className="hidden text-sm text-ink-subtle sm:inline">
+      <div className="relative z-10 min-h-screen">
+        <header className="sticky top-0 z-20 border-b border-border bg-canvas/70 backdrop-blur-md">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+            <Logo />
+            <span className="hidden text-xs text-ink-subtle sm:inline">
               GitHub organization health
             </span>
           </div>

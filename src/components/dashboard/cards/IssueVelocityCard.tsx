@@ -199,14 +199,14 @@ function Stat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-2 px-3 py-2">
-      <div className="text-lg font-semibold tabular-nums text-ink">
+    <div className="rounded-lg border border-border bg-surface-2/60 px-3 py-2.5">
+      <div className="font-display text-xl font-semibold tabular-nums text-ink">
         {value}
       </div>
-      <div className="text-[11px] uppercase tracking-wide text-ink-subtle">
+      <div className="mt-0.5 text-[11px] text-ink-subtle">
         {label}
+        {hint && <span className="text-ink-subtle/70"> · {hint}</span>}
       </div>
-      {hint && <div className="text-[10px] text-ink-subtle">{hint}</div>}
     </div>
   );
 }

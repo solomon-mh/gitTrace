@@ -69,7 +69,7 @@ export function PrHealthCard() {
                 type="button"
                 onClick={() => setFilter(key)}
                 className={`rounded px-2 py-1 ${
-                  filter === key ? "bg-surface shadow-sm" : "text-ink-muted"
+                  filter === key ? "bg-accent/15 text-accent" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {label}
@@ -100,38 +100,20 @@ export function PrHealthCard() {
           {rows.length === 0 ? (
             <EmptyState title={`No PRs match the “${filter}” filter.`} />
           ) : (
-            <div className="max-h-[420px] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-surface text-left text-xs uppercase tracking-wide text-ink-subtle">
-                  <tr>
-                    <th className="py-2 pr-2 font-medium">Age</th>
-                    <th className="py-2 pr-2 font-medium">PR</th>
-                    <th className="hidden py-2 pr-2 font-medium sm:table-cell">
-                      Repo
-                    </th>
-                    <th className="hidden py-2 pr-2 font-medium md:table-cell">
-                      Author
-                    </th>
-                    <th className="py-2 font-medium">Opened</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {rows.map((pr) => (
-                    <PrRow key={`${pr.repo}#${pr.number}`} pr={pr} />
-                  ))}
-                </tbody>
-              </table>
+            <div className="-mx-2 max-h-[440px] overflow-y-auto">
+              {rows.map((pr) => (
+                <PrRow key={`${pr.repo}#${pr.number}`} pr={pr} />
+              ))}
             </div>
           )}
 
-          <p className="mt-3 text-xs text-ink-subtle">
-            Showing {rows.length} of {data.totalOpen} open PR(s) across{" "}
-            {data.byRepo.filter((r) => r.open > 0).length} repo(s).
+          <p className="mt-3 border-t border-border pt-3 text-xs text-ink-subtle">
+            {rows.length} of {data.totalOpen} open across{" "}
+            {data.byRepo.filter((r) => r.open > 0).length} repo(s)
             {data.truncatedRepos.length > 0 && (
               <>
-                {" "}
-                Only the oldest 50 PRs per repo are loaded for:{" "}
-                {data.truncatedRepos.map(shortRepo).join(", ")}.
+                {" · "}oldest 50/repo shown for{" "}
+                {data.truncatedRepos.map(shortRepo).join(", ")}
               </>
             )}
           </p>
@@ -143,47 +125,45 @@ export function PrHealthCard() {
 
 function PrRow({ pr }: { pr: OpenPR }) {
   return (
-    <tr className="align-top hover:bg-surface-2">
-      <td className="py-2 pr-2">
-        <AgeBadge days={pr.ageDays} stale={pr.isStale} />
-      </td>
-      <td className="py-2 pr-2">
-        <a
-          href={pr.url}
-          target="_blank"
-          rel="noreferrer"
-          className="font-medium text-ink hover:text-accent hover:underline"
-        >
-          <span className="text-ink-subtle">#{pr.number}</span> {pr.title}
-        </a>
-        <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-ink-subtle">
+    <a
+      href={pr.url}
+      target="_blank"
+      rel="noreferrer"
+      className="group flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-surface-2"
+    >
+      <AgeBadge days={pr.ageDays} stale={pr.isStale} />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm text-ink group-hover:text-accent">
+          <span className="font-mono text-xs text-ink-subtle">
+            #{pr.number}
+          </span>{" "}
+          {pr.title}
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-ink-subtle">
           {pr.isDraft && (
-            <span className="rounded bg-surface-2 px-1.5 py-0.5 uppercase text-ink-muted">
+            <span className="rounded bg-surface-2 px-1.5 py-px uppercase text-ink-muted">
               draft
             </span>
           )}
           {pr.reviewDecision === "APPROVED" && (
-            <span className="rounded bg-ok/10 px-1.5 py-0.5 text-ok">
+            <span className="rounded bg-ok/10 px-1.5 py-px text-ok">
               approved
             </span>
           )}
           {pr.reviewDecision === "CHANGES_REQUESTED" && (
-            <span className="rounded bg-warn/10 px-1.5 py-0.5 text-warn">
+            <span className="rounded bg-warn/10 px-1.5 py-px text-warn">
               changes requested
             </span>
           )}
-          {pr.commentCount > 0 && <span>💬 {pr.commentCount}</span>}
-          <span className="sm:hidden">· {shortRepo(pr.repo)}</span>
+          <span className="text-ink-muted">{shortRepo(pr.repo)}</span>
+          <span>·</span>
+          <span>{pr.author ? `@${pr.author}` : "unknown"}</span>
+          <span>·</span>
+          <span>{shortDate(pr.createdAt)}</span>
+          {pr.commentCount > 0 && <span>· 💬 {pr.commentCount}</span>}
         </div>
-      </td>
-      <td className="hidden py-2 pr-2 text-ink-muted sm:table-cell">
-        {shortRepo(pr.repo)}
-      </td>
-      <td className="hidden py-2 pr-2 text-ink-muted md:table-cell">
-        {pr.author ? `@${pr.author}` : "—"}
-      </td>
-      <td className="py-2 text-ink-muted">{shortDate(pr.createdAt)}</td>
-    </tr>
+      </div>
+    </a>
   );
 }
 
@@ -195,7 +175,7 @@ function AgeBadge({ days, stale }: { days: number; stale: boolean }) {
       : "bg-surface-2 text-ink-muted";
   return (
     <span
-      className={`inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium tabular-nums ${tone}`}
+      className={`mt-0.5 inline-block w-11 shrink-0 rounded-md py-0.5 text-center font-mono text-xs font-medium tabular-nums ${tone}`}
     >
       {days}d
     </span>

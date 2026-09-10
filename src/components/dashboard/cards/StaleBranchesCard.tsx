@@ -77,7 +77,7 @@ export function StaleBranchesCard() {
                 type="button"
                 onClick={() => setStaleDays(d)}
                 className={`rounded px-2 py-1 ${
-                  staleDays === d ? "bg-surface shadow-sm" : "text-ink-muted"
+                  staleDays === d ? "bg-accent/15 text-accent" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {d}d
@@ -108,37 +108,19 @@ export function StaleBranchesCard() {
               hint="Tick “show all” to see every branch, or lower the threshold."
             />
           ) : (
-            <div className="max-h-[420px] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-surface text-left text-xs uppercase tracking-wide text-ink-subtle">
-                  <tr>
-                    <th className="py-2 pr-2 font-medium">Idle</th>
-                    <th className="py-2 pr-2 font-medium">Branch</th>
-                    <th className="hidden py-2 pr-2 font-medium sm:table-cell">
-                      Repo
-                    </th>
-                    <th className="hidden py-2 pr-2 font-medium md:table-cell">
-                      Last commit
-                    </th>
-                    <th className="py-2 font-medium">Author</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {rows.map((b) => (
-                    <BranchRow key={`${b.repo}:${b.name}`} b={b} />
-                  ))}
-                </tbody>
-              </table>
+            <div className="-mx-2 max-h-[440px] overflow-y-auto">
+              {rows.map((b) => (
+                <BranchRow key={`${b.repo}:${b.name}`} b={b} />
+              ))}
             </div>
           )}
 
-          <p className="mt-3 text-xs text-ink-subtle">
-            Showing {rows.length} branch(es).
+          <p className="mt-3 border-t border-border pt-3 text-xs text-ink-subtle">
+            {rows.length} branch(es)
             {data.truncatedRepos.length > 0 && (
               <>
-                {" "}
-                Only the 100 stalest branches per repo are loaded for:{" "}
-                {data.truncatedRepos.map(shortRepo).join(", ")}.
+                {" · "}stalest 100/repo shown for{" "}
+                {data.truncatedRepos.map(shortRepo).join(", ")}
               </>
             )}
           </p>
@@ -149,46 +131,47 @@ export function StaleBranchesCard() {
 }
 
 function BranchRow({ b }: { b: BranchInfo }) {
+  const tone = b.isDefault
+    ? "bg-surface-2 text-ink-subtle"
+    : b.ageDays > 90
+      ? "bg-danger/10 text-danger"
+      : b.isStale
+        ? "bg-warn/10 text-warn"
+        : "bg-surface-2 text-ink-muted";
   return (
-    <tr
-      className={`align-top hover:bg-surface-2 ${
-        b.isDefault ? "text-ink-subtle" : ""
-      }`}
-    >
-      <td className="py-2 pr-2">
-        <span
-          className={`inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium tabular-nums ${
-            b.isDefault
-              ? "bg-surface-2 text-ink-subtle"
-              : b.ageDays > 90
-                ? "bg-danger/10 text-danger"
-                : b.isStale
-                  ? "bg-warn/10 text-warn"
-                  : "bg-surface-2 text-ink-muted"
-          }`}
-        >
-          {Number.isFinite(b.ageDays) ? `${b.ageDays}d` : "—"}
-        </span>
-      </td>
-      <td className="py-2 pr-2">
-        <span className="font-mono text-[13px]">{b.name}</span>
-        {b.isDefault && (
-          <span className="ml-2 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-ink-subtle">
-            default
+    <div className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-surface-2">
+      <span
+        className={`mt-0.5 inline-block w-14 shrink-0 rounded-md py-0.5 text-center font-mono text-xs font-medium tabular-nums ${tone}`}
+      >
+        {Number.isFinite(b.ageDays) ? `${b.ageDays}d` : "—"}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span
+            className={`truncate font-mono text-[13px] ${
+              b.isDefault ? "text-ink-subtle" : "text-ink"
+            }`}
+          >
+            {b.name}
           </span>
-        )}
-      </td>
-      <td className="hidden py-2 pr-2 text-ink-muted sm:table-cell">
-        {shortRepo(b.repo)}
-      </td>
-      <td className="hidden py-2 pr-2 text-ink-muted md:table-cell">
-        {b.lastCommitDate ? shortDate(b.lastCommitDate) : "—"}
-      </td>
-      <td className="py-2 text-ink-muted">
-        {b.lastCommitLogin
-          ? `@${b.lastCommitLogin}`
-          : (b.lastCommitAuthor ?? "—")}
-      </td>
-    </tr>
+          {b.isDefault && (
+            <span className="shrink-0 rounded bg-surface-2 px-1.5 py-px text-[10px] uppercase text-ink-subtle">
+              default
+            </span>
+          )}
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-ink-subtle">
+          <span className="text-ink-muted">{shortRepo(b.repo)}</span>
+          <span>·</span>
+          <span>{b.lastCommitDate ? shortDate(b.lastCommitDate) : "—"}</span>
+          <span>·</span>
+          <span>
+            {b.lastCommitLogin
+              ? `@${b.lastCommitLogin}`
+              : (b.lastCommitAuthor ?? "unknown")}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

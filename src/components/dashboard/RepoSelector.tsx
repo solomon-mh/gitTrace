@@ -175,7 +175,7 @@ export function RepoSelector() {
               type="button"
               onClick={() => setMode(m)}
               className={`rounded-md px-2 py-1.5 ${
-                mode === m ? "bg-surface shadow-sm" : "text-ink-muted"
+                mode === m ? "bg-accent/15 text-accent" : "text-ink-muted hover:text-ink"
               }`}
             >
               {label}

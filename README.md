@@ -5,6 +5,12 @@ activity, PR age, stale branches, contributor concentration and issue velocity
 into one screen, so you can tell how your repos are doing without clicking
 through a dozen GitHub tabs.
 
+**Brand:** the mark is two git branches weaving past each other — a braided
+current — with a commit node where they cross. "Git" (branch lanes + commit dot)
+and "stream" (the flowing weave) in one glyph. Type: Space Grotesk for the
+wordmark and headings, Inter for UI, JetBrains Mono for anything numeric.
+Sky-cyan accent — the stream. Dark by default.
+
 ![GitStream dashboard](docs/screenshot.png)
 
 ## Stack

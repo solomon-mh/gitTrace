@@ -17,8 +17,8 @@ export const SERIES_COLORS = [
   "#e66767", // red
 ] as const;
 
-/** Single-hue blue for one-series magnitude charts (the aggregate bar chart). */
-export const PRIMARY_HUE = "#3987e5";
+/** The brand accent — used for single-series magnitude charts (aggregate bar). */
+export const PRIMARY_HUE = "#38bdf8";
 
 /** Neutral colour for the folded "Other" series. */
 export const MUTED_SERIES = "#7c828e";
@@ -27,9 +27,9 @@ export const MUTED_SERIES = "#7c828e";
 export const MAX_SERIES = 7;
 
 // Tuned for the dark canvas (see globals.css tokens).
-export const AXIS_COLOR = "#3a3f4a";
-export const GRID_COLOR = "#262a33";
-export const TEXT_COLOR = "#9aa1ac";
+export const AXIS_COLOR = "#3f3f46";
+export const GRID_COLOR = "#27272d";
+export const TEXT_COLOR = "#a1a1aa";
 
 /** Common Recharts props for a recessive cartesian grid. */
 export const gridProps = {
@@ -61,13 +61,13 @@ export function shortRepo(nameWithOwner: string): string {
 /** Tooltip container styling shared by all charts. */
 export const tooltipStyle = {
   contentStyle: {
-    borderRadius: 8,
-    border: "1px solid #2a2e37",
-    background: "#1e2128",
-    color: "#e6e8eb",
+    borderRadius: 10,
+    border: "1px solid #27272d",
+    background: "#18181b",
+    color: "#f4f4f5",
     fontSize: 12,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+    boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
   },
-  labelStyle: { color: "#e6e8eb", fontWeight: 600 },
-  itemStyle: { color: "#c3c7ce" },
+  labelStyle: { color: "#f4f4f5", fontWeight: 600 },
+  itemStyle: { color: "#d4d4d8" },
 } as const;

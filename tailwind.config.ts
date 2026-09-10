@@ -14,6 +14,11 @@ const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: "var(--font-sans-stack)",
+        display: "var(--font-display-stack)",
+        mono: "var(--font-mono-stack)",
+      },
       colors: {
         canvas: withAlpha("--canvas"), // page background
         surface: withAlpha("--surface"), // card background

@@ -7,56 +7,113 @@
  * modifier works). GitStream is dark by default (:root). Adding `light` to
  * <html> flips every token — nothing toggles it today, but the switch is
  * one line away.
+ *
+ * Palette: near-black warm-neutral canvas, sky-cyan accent (the "stream").
  */
 :root {
   color-scheme: dark;
 
-  --canvas: 12 13 16;
-  --surface: 22 24 29;
-  --surface-2: 30 33 40;
-  --border-color: 42 46 55;
+  --canvas: 9 9 11;
+  --surface: 18 18 21;
+  --surface-2: 26 26 30;
+  --border-color: 39 39 45;
 
-  --ink: 230 232 235;
-  --ink-muted: 154 161 172;
-  --ink-subtle: 118 126 138;
+  --ink: 244 244 245;
+  --ink-muted: 161 161 170;
+  --ink-subtle: 112 112 122;
 
-  --accent: 59 130 246;
-  --accent-hover: 37 99 235;
+  --accent: 56 189 248;
+  --accent-hover: 14 165 233;
 
-  --ok: 63 185 80;
-  --warn: 210 153 34;
-  --danger: 248 81 73;
+  --ok: 52 211 153;
+  --warn: 251 191 36;
+  --danger: 248 113 113;
+
+  --font-sans-stack: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display-stack: var(--font-display), var(--font-sans), ui-sans-serif,
+    system-ui, sans-serif;
+  --font-mono-stack: var(--font-mono), ui-monospace, "SF Mono", Menlo,
+    Consolas, monospace;
 }
 
 :root.light {
   color-scheme: light;
 
-  --canvas: 246 247 249;
+  --canvas: 249 250 251;
   --surface: 255 255 255;
-  --surface-2: 241 243 245;
-  --border-color: 227 230 234;
+  --surface-2: 243 244 246;
+  --border-color: 228 228 231;
 
-  --ink: 15 23 42;
-  --ink-muted: 75 85 99;
-  --ink-subtle: 148 163 184;
+  --ink: 24 24 27;
+  --ink-muted: 82 82 91;
+  --ink-subtle: 148 148 156;
 
-  --accent: 37 99 235;
-  --accent-hover: 29 78 216;
+  --accent: 2 132 199;
+  --accent-hover: 3 105 161;
 
-  --ok: 22 163 74;
+  --ok: 21 128 61;
   --warn: 180 83 9;
   --danger: 220 38 38;
+}
+
+html {
+  font-family: var(--font-sans-stack);
 }
 
 body {
   background: rgb(var(--canvas));
   color: rgb(var(--ink));
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Keep the Recharts hover cursor subtle on a dark surface. */
+.font-display {
+  font-family: var(--font-display-stack);
+}
+.font-mono {
+  font-family: var(--font-mono-stack);
+}
+
+/* Subtle top-of-page glow so the canvas isn't a dead flat black. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 340px;
+  background: radial-gradient(
+    60% 100% at 50% 0%,
+    rgb(var(--accent) / 0.08),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Recharts theming */
 .recharts-tooltip-cursor {
-  fill: rgb(var(--ink) / 0.06);
+  fill: rgb(var(--ink) / 0.05);
 }
 .recharts-cartesian-grid line {
   stroke: rgb(var(--border-color));
+}
+.recharts-default-legend {
+  font-family: var(--font-sans-stack);
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.3);
+}
+
+/* Thin, themed scrollbars for the inner scroll areas. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border-color)) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-color));
+  border-radius: 999px;
 }

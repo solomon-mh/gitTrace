@@ -103,7 +103,7 @@ function ViewToggle({
           type="button"
           onClick={() => onChange(v)}
           className={`rounded px-2 py-1 ${
-            view === v ? "bg-surface shadow-sm" : "text-ink-muted"
+            view === v ? "bg-accent/15 text-accent" : "text-ink-muted hover:text-ink"
           }`}
         >
           {v === "aggregate" ? "Aggregate" : "Per repo"}
@@ -245,35 +245,32 @@ function CommitActivityBody({
         </ResponsiveContainer>
       </div>
 
-      {/* Per-repo totals for the window */}
-      <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 text-xs sm:grid-cols-2">
+      {/* Per-repo totals for the window — one compact wrapping row */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-border pt-3 text-xs">
         {data.totals.map((t, i) => (
-          <li
-            key={t.repo}
-            className="flex items-center justify-between border-b border-border py-1"
-          >
-            <span className="flex items-center gap-1.5 truncate">
-              <span
-                className="inline-block h-2 w-2 shrink-0 rounded-full"
-                style={{
-                  background:
-                    i < MAX_SERIES
-                      ? SERIES_COLORS[i % SERIES_COLORS.length]
-                      : MUTED_SERIES,
-                }}
-              />
-              <span className="truncate text-ink-muted">{shortRepo(t.repo)}</span>
-            </span>
-            <span className="font-medium text-ink">
+          <span key={t.repo} className="flex items-center gap-1.5">
+            <span
+              className="inline-block h-2 w-2 shrink-0 rounded-full"
+              style={{
+                background:
+                  i < MAX_SERIES
+                    ? SERIES_COLORS[i % SERIES_COLORS.length]
+                    : MUTED_SERIES,
+              }}
+            />
+            <span className="text-ink-muted">{shortRepo(t.repo)}</span>
+            <span className="font-mono font-medium text-ink">
               {formatNumber(t.total)}
             </span>
-          </li>
+          </span>
         ))}
-        <li className="flex items-center justify-between py-1 text-ink-muted sm:col-span-2">
-          <span>Total</span>
-          <span className="font-semibold">{formatNumber(totalCommits)}</span>
-        </li>
-      </ul>
+        <span className="ml-auto flex items-center gap-1.5 text-ink-subtle">
+          total
+          <span className="font-mono font-semibold text-ink">
+            {formatNumber(totalCommits)}
+          </span>
+        </span>
+      </div>
     </div>
   );
 }
