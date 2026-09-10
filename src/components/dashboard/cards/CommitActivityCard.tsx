@@ -55,7 +55,7 @@ export function CommitActivityCard() {
     <Card
       title="Commit activity"
       subtitle={`Last ${windowWeeks} weeks`}
-      className="md:col-span-2"
+      className="xl:col-span-2"
       actions={
         <div className="flex items-center gap-2">
           <ViewToggle view={view} onChange={setView} />

@@ -56,7 +56,6 @@ export function StaleBranchesCard() {
           ? `${staleCount} branch(es) idle > ${staleDays}d · ${data.totalBranches} total`
           : "Branches with no recent commits"
       }
-      className="md:col-span-2"
       actions={
         <div className="flex items-center gap-2">
           {data && data.branches.length > 0 && (

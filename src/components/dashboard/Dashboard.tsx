@@ -1,9 +1,9 @@
 "use client";
 
 import { DashboardProvider } from "./DashboardContext";
-import { StatusBar } from "./StatusBar";
-import { RepoSelector } from "./RepoSelector";
-import { Logo } from "@/components/Logo";
+import { TopBar } from "./TopBar";
+import { ScopeHint } from "./ScopeHint";
+import { RepoSidebar } from "./RepoSidebar";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
 import { StaleBranchesCard } from "./cards/StaleBranchesCard";
@@ -11,38 +11,29 @@ import { ContributorActivityCard } from "./cards/ContributorActivityCard";
 import { IssueVelocityCard } from "./cards/IssueVelocityCard";
 
 /**
- * The dashboard shell.
+ * App-shell layout:
  *
- * Layout: a sticky control column (repo selector) on the left, and a grid of
- * metric cards on the right. Cards are added one per build step:
- *   step 3 — commit activity
- *   step 4 — PR health
- *   step 5 — stale branches
- *   step 6 — contributor activity
- *   step 7 — issue velocity
+ *   ┌──────────────┬───────────────────────────────────┐
+ *   │  sidebar     │  top bar (identity · rate · token) │
+ *   │  (logo +     ├───────────────────────────────────┤
+ *   │   repo       │  scope hint (only if restricted)   │
+ *   │   picker +   │                                    │
+ *   │   repo list) │  metric card grid                  │
+ *   └──────────────┴───────────────────────────────────┘
+ *
+ * The sidebar is the control surface — every card follows its selection.
  */
 export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
   return (
     <DashboardProvider defaultOrg={defaultOrg}>
-      <div className="relative z-10 min-h-screen">
-        <header className="sticky top-0 z-20 border-b border-border bg-canvas/70 backdrop-blur-md">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-            <Logo />
-            <span className="hidden text-xs text-ink-subtle sm:inline">
-              GitHub organization health
-            </span>
-          </div>
-        </header>
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        <RepoSidebar />
 
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
-          <StatusBar />
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
-            <div className="lg:sticky lg:top-[68px] lg:self-start">
-              <RepoSelector />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
+        <main className="flex min-w-0 flex-1 flex-col">
+          <TopBar />
+          <div className="flex-1 px-4 py-5 sm:px-6">
+            <ScopeHint />
+            <div className="grid gap-4 xl:grid-cols-2">
               <CommitActivityCard />
               <PrHealthCard />
               <StaleBranchesCard />
@@ -50,7 +41,7 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
               <IssueVelocityCard />
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </DashboardProvider>
   );

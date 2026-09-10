@@ -49,7 +49,7 @@ export function IssueVelocityCard() {
     <Card
       title="Issue velocity"
       subtitle={`Last ${windowWeeks} weeks`}
-      className="md:col-span-2"
+      className="xl:col-span-2"
       actions={
         <select
           value={windowWeeks}

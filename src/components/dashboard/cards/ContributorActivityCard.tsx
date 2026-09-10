@@ -47,7 +47,7 @@ export function ContributorActivityCard() {
           ? `Last ${windowWeeks} weeks · ${riskCount} bus-factor risk(s)`
           : "Who's committing, and concentration risk"
       }
-      className="md:col-span-2"
+      className="xl:col-span-2"
       actions={
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1 text-xs text-ink-muted">

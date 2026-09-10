@@ -52,7 +52,6 @@ export function PrHealthCard() {
           ? `${data.totalOpen} open · ${data.staleCountIsLowerBound ? "≥" : ""}${data.staleCount} older than ${data.thresholdDays}d`
           : "Open pull requests, oldest first"
       }
-      className="md:col-span-2"
       actions={
         data &&
         data.totalOpen > 0 && (
