@@ -22,6 +22,18 @@ export interface Repo {
   stargazerCount: number;
   openIssues: number;
   openPullRequests: number;
+  /**
+   * The token user's permission on this repo: ADMIN / MAINTAIN / WRITE / TRIAGE
+   * / READ. Lets the UI show why a repo you don't own is in your list
+   * (you're a collaborator) vs. one you fully control.
+   */
+  viewerPermission:
+    | "ADMIN"
+    | "MAINTAIN"
+    | "WRITE"
+    | "TRIAGE"
+    | "READ"
+    | null;
 }
 
 export interface RepoListResult {

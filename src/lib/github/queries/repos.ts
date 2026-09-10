@@ -27,6 +27,7 @@ interface RepoNode {
   stargazerCount: number;
   issues: { totalCount: number };
   pullRequests: { totalCount: number };
+  viewerPermission: Repo["viewerPermission"];
 }
 
 const REPO_FIELDS = /* GraphQL */ `
@@ -40,6 +41,7 @@ const REPO_FIELDS = /* GraphQL */ `
   defaultBranchRef { name }
   pushedAt
   stargazerCount
+  viewerPermission
   issues(states: OPEN) { totalCount }
   pullRequests(states: OPEN) { totalCount }
 `;
@@ -58,6 +60,7 @@ function toRepo(node: RepoNode): Repo {
     stargazerCount: node.stargazerCount,
     openIssues: node.issues.totalCount,
     openPullRequests: node.pullRequests.totalCount,
+    viewerPermission: node.viewerPermission ?? null,
   };
 }
 

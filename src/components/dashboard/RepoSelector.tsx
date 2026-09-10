@@ -42,12 +42,19 @@ export function RepoSelector() {
   );
   const [filter, setFilter] = useState("");
   const [orgs, setOrgs] = useState<VerifyResult["organizations"]>([]);
+  const [viewerLogin, setViewerLogin] = useState<string | null>(null);
+  const [ownedOnly, setOwnedOnly] = useState(false);
 
-  // Which orgs can the token see? Offer them as one-click picks.
+  // Who are we, and which orgs can the token see? (Used for the "collaborator"
+  // tags and the org quick-picks.)
   useEffect(() => {
     let cancelled = false;
     apiGet<VerifyResult>("/api/verify")
-      .then((v) => !cancelled && setOrgs(v.organizations ?? []))
+      .then((v) => {
+        if (cancelled) return;
+        setOrgs(v.organizations ?? []);
+        setViewerLogin(v.login);
+      })
       .catch(() => {
         /* status bar already surfaces auth problems */
       });
@@ -55,6 +62,15 @@ export function RepoSelector() {
       cancelled = true;
     };
   }, []);
+
+  /** A repo is "mine" if I own it directly or it's in one of my orgs. */
+  const orgLogins = useMemo(
+    () => new Set(orgs.map((o) => o.login.toLowerCase())),
+    [orgs],
+  );
+  const isOwned = (r: Repo) =>
+    r.owner.toLowerCase() === viewerLogin?.toLowerCase() ||
+    orgLogins.has(r.owner.toLowerCase());
 
   // Keep the local mode/inputs in sync if the source is set from elsewhere
   // (URL param, "clear", localStorage hydrate).
@@ -79,11 +95,21 @@ export function RepoSelector() {
     }
   }
 
+  const collabCount = useMemo(
+    () => repos.filter((r) => !isOwned(r)).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [repos, viewerLogin, orgLogins],
+  );
+
   const visible = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    if (!q) return repos;
-    return repos.filter((r) => r.nameWithOwner.toLowerCase().includes(q));
-  }, [repos, filter]);
+    return repos.filter((r) => {
+      if (q && !r.nameWithOwner.toLowerCase().includes(q)) return false;
+      if (ownedOnly && !isOwned(r)) return false;
+      return true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repos, filter, ownedOnly, viewerLogin, orgLogins]);
 
   // Group the (filtered) repo list by owner so a "my repos" list with many orgs
   // is navigable rather than a 300-row wall.
@@ -273,6 +299,18 @@ export function RepoSelector() {
               </button>
             </div>
 
+            {collabCount > 0 && (
+              <label className="mb-2 flex items-center gap-1.5 text-xs text-slate-500">
+                <input
+                  type="checkbox"
+                  checked={ownedOnly}
+                  onChange={(e) => setOwnedOnly(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-slate-300"
+                />
+                Hide {collabCount} repo(s) you only collaborate on
+              </label>
+            )}
+
             <div className="max-h-80 overflow-y-auto rounded-lg border border-slate-100">
               {grouped.map(([owner, ownerRepos]) => (
                 <div key={owner}>
@@ -301,8 +339,17 @@ export function RepoSelector() {
                                   {r.owner}
                                 </span>
                               )}
+                              {!isOwned(r) && (
+                                <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] uppercase text-amber-700">
+                                  {r.viewerPermission === "READ" ||
+                                  r.viewerPermission === "TRIAGE" ||
+                                  r.viewerPermission == null
+                                    ? "collaborator"
+                                    : "collab · write"}
+                                </span>
+                              )}
                               {r.isPrivate && (
-                                <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
+                                <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-500">
                                   private
                                 </span>
                               )}
