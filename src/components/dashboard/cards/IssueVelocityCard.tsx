@@ -17,6 +17,7 @@ import { useCardData, reposQuery } from "@/components/dashboard/useCardData";
 import {
   axisProps,
   gridProps,
+  NO_ANIM,
   SERIES_COLORS,
   shortRepo,
   tooltipStyle,
@@ -154,22 +155,24 @@ function IssueVelocityBody({ data }: { data: IssueVelocityResult }) {
               iconType="plainline"
             />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="opened"
               name="Opened"
               stroke={OPENED_COLOR}
               strokeWidth={2}
               dot={false}
               activeDot={{ r: 4 }}
+              {...NO_ANIM}
             />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="closed"
               name="Closed"
               stroke={CLOSED_COLOR}
               strokeWidth={2}
               dot={false}
               activeDot={{ r: 4 }}
+              {...NO_ANIM}
             />
           </LineChart>
         </ResponsiveContainer>

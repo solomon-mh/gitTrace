@@ -21,6 +21,7 @@ import {
   axisProps,
   gridProps,
   MAX_SERIES,
+  NO_ANIM,
   PRIMARY_HUE,
   SERIES_COLORS,
   shortRepo,
@@ -198,6 +199,7 @@ function CommitActivityBody({
                 fill={PRIMARY_HUE}
                 radius={[4, 4, 0, 0]}
                 maxBarSize={28}
+                {...NO_ANIM}
               />
             </BarChart>
           ) : (
@@ -224,7 +226,7 @@ function CommitActivityBody({
               {lineKeys.map((key, i) => (
                 <Line
                   key={key}
-                  type="monotone"
+                  type="linear"
                   dataKey={key}
                   stroke={
                     key === "Other"
@@ -234,6 +236,7 @@ function CommitActivityBody({
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4 }}
+                  {...NO_ANIM}
                 />
               ))}
             </LineChart>

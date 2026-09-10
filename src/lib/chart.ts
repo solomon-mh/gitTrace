@@ -40,6 +40,14 @@ export const axisProps = {
   tickLine: false,
 } as const;
 
+/**
+ * Disable Recharts' entry animation. The dashboard reloads charts on every
+ * filter change, so the grow-in animation just adds latency and jank — and it
+ * makes headless screenshots capture empty axes. Static marks are the right
+ * call here.
+ */
+export const NO_ANIM = { isAnimationActive: false } as const;
+
 /** Just the repo name from "owner/name". */
 export function shortRepo(nameWithOwner: string): string {
   const i = nameWithOwner.indexOf("/");

@@ -1,18 +1,24 @@
 # GitStream
 
-A single-page dashboard for GitHub organization health: commit activity, PR age,
-stale branches, contributor concentration, and issue velocity — so you don't have
-to click through a dozen GitHub tabs to know how your repos are doing.
+A single-page dashboard for GitHub **organization health**. It pulls commit
+activity, PR age, stale branches, contributor concentration and issue velocity
+into one screen, so you can tell how your repos are doing without clicking
+through a dozen GitHub tabs.
 
-> **Build status:** step 1 of 8 — project scaffold + GitHub API auth.
+![GitStream dashboard](docs/screenshot.png)
 
 ## Stack
 
-- Next.js 14 (App Router) + TypeScript
-- Tailwind CSS
-- Recharts (added in later steps)
-- GitHub GraphQL API v4, called from Next.js Route Handlers with a server-side PAT
-- In-memory response cache to stay well inside GitHub's rate limits
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router) + TypeScript |
+| Styling | Tailwind CSS |
+| Charts | Recharts 3 |
+| Data | GitHub **GraphQL v4** (REST only for the stats endpoints GraphQL doesn't expose) |
+| Auth | A GitHub Personal Access Token, read **server-side only** from `GITHUB_TOKEN` |
+| Caching | In-memory TTL cache in the Node process, so repeated loads don't re-hit the API |
+
+---
 
 ## Setup
 
@@ -26,58 +32,126 @@ npm install
 
 **Classic token** (simplest):
 
-1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → *Generate new token (classic)*
-2. Scopes:
-   - `repo` — needed to read private repositories (skip if you only track public repos)
-   - `read:org` — needed to list an organization's repositories
-3. Generate, copy the `ghp_…` value.
+1. GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → *Generate new token (classic)*
+2. Select scopes:
+   | Scope | Why |
+   |---|---|
+   | `repo` | Read private repositories, their PRs, branches, issues. Omit if you only track **public** repos. |
+   | `read:org` | List an organization's repositories. |
+3. Generate and copy the `ghp_…` value.
 
-**Fine-grained token** (more locked down): grant the target organization/repos
-these read-only permissions: *Contents*, *Metadata*, *Pull requests*, *Issues*.
+**Fine-grained token** (more locked down): pick the target organization, grant it
+these **read-only** repository permissions: *Contents*, *Metadata*,
+*Pull requests*, *Issues*. Organization permission: *Members* (read-only) helps
+with private-repo discovery.
 
 ### 3. Configure the environment
 
 ```bash
 cp .env.example .env.local
-# edit .env.local and paste your token into GITHUB_TOKEN
 ```
 
-`.env.local` is git-ignored. The token is only ever read server-side (in
-`src/app/api/**`); it is never sent to the browser.
+Edit `.env.local`:
+
+```bash
+GITHUB_TOKEN=ghp_your_real_token_here
+# optional — org to auto-load when the dashboard opens
+NEXT_PUBLIC_DEFAULT_ORG=your-org
+```
+
+`.env.local` is git-ignored. **Never put a real token in `.env.example`** — that
+file is committed. The token is only read in server-side Route Handlers
+(`src/app/api/**`) and is never sent to the browser.
 
 ### 4. Run
 
 ```bash
-npm run dev
+npm run dev          # http://localhost:3000
 ```
 
-Open <http://localhost:3000>. Step 1's page calls `/api/verify`, which runs a
-GraphQL `viewer { login }` query and lists your most recently pushed repos. If
-you see your username and a repo list, auth works.
+Other scripts:
 
-You can also hit the endpoint directly:
+```bash
+npm run build        # production build
+npm start            # run the production build
+npm run typecheck    # tsc --noEmit
+```
+
+### 5. Verify it works
+
+Open <http://localhost:3000>. The status bar at the top should show
+`@your-username` and your rate-limit budget. Or hit the endpoint directly:
 
 ```bash
 curl -s localhost:3000/api/verify | jq
 ```
+
+Then type an org name (or switch to "Specific repos" and paste `owner/name`
+lines) and click **Load repositories**.
+
+You can also deep-link a view:
+
+```
+/?org=vercel&weeks=26&staleDays=60
+/?repos=vercel/next.js,facebook/react
+```
+
+---
+
+## What each card shows
+
+| Card | Data | Notes |
+|---|---|---|
+| **Commit activity** | Commits per week, per repo + aggregate, over 4–52 weeks | From REST `stats/commit_activity`. Aggregate = bar chart, per-repo = line chart (top 7 repos, rest folded into "Other"). |
+| **PR health** | Every open PR, oldest first | PRs older than **14 days** get a red badge (7–14d amber). Draft / approved / changes-requested tags. Filter: All / Stale / Ready. Fetches the oldest 50 PRs per repo. |
+| **Stale branches** | Branches with no commits in **30 / 60 / 90 days** (toggle) | Shows last-commit date + author. Default branch is listed but greyed and never counted as "stale". Fetches the 100 stalest branches per repo. |
+| **Contributor activity** | Commits per contributor in the window, as a share of the repo | Repos where one person authored **> 80%** (with ≥ 10 commits) are flagged as a **bus-factor risk**. Bots (`*[bot]`, `actions-user`, …) are hidden by default — toggle "hide bots" off to include them. |
+| **Issue velocity** | Opened vs. closed issues per week + average time-to-close | Totals are exact; the weekly chart and the average use the 100 most-recent issues per direction (flagged when a repo exceeds that). "Open now" is the current backlog. |
+
+Every card follows the **selected repos** and the shared **time window**. Loading,
+empty and error states are handled per card — you never get a blank space.
+
+---
 
 ## Project layout
 
 ```
 src/
   app/
-    api/verify/route.ts   Step-1 auth check endpoint
-    layout.tsx
-    page.tsx              Step-1 UI (replaced by the dashboard later)
+    api/
+      verify/route.ts            GET  — token / auth check + rate limit
+      repos/route.ts             GET  — repo list (?org= or ?repos=)
+      commit-activity/route.ts   GET  — weekly commit counts
+      pull-requests/route.ts     GET  — open PRs, oldest-first
+      branches/route.ts          GET  — branches, stalest-first
+      contributors/route.ts      GET  — contributor shares + bus factor
+      issues/route.ts            GET  — opened/closed per week + time-to-close
+      cache/clear/route.ts       POST — drop the in-memory cache ("Refresh all")
+    layout.tsx  page.tsx  error.tsx  not-found.tsx
+
+  components/
+    dashboard/
+      Dashboard.tsx              shell: status bar + selector + card grid
+      DashboardContext.tsx       shared state (source, selection, window, refresh)
+      StatusBar.tsx              auth identity, rate limit, "Refresh all", setup banner
+      RepoSelector.tsx           org / repo-list input + checkable repo list
+      useCardData.ts             shared fetch lifecycle for cards
+      cards/                     one component per metric card
+    ui/                          Card shell + Loading/Empty/Error/Skeleton states
+
   lib/
     api/
-      client.ts           Browser fetch helper + error descriptions
-      respond.ts          Route-handler wrapper -> uniform JSON errors
+      client.ts                 browser fetch helper + describeError()
+      respond.ts                route wrapper -> uniform { error: { kind, message } }
     github/
-      client.ts           GraphQL/REST transport, typed errors, auth
-      cache.ts            In-memory TTL cache with request de-duplication
-      errors.ts           GitHubApiError + error-kind -> HTTP status
-      queries/            One file per query (verify, repos, commits, …)
+      client.ts                 GraphQL + REST transport, auth, typed errors
+      cache.ts                  in-memory TTL cache + request de-duplication
+      errors.ts                 GitHubApiError, kind -> HTTP status
+      paginate.ts               generic Relay-cursor pagination
+      types.ts                  normalised data shapes
+      queries/                  one file per query (verify, repos, commitActivity, …)
+    chart.ts                    shared Recharts palette + axis config
+    format.ts                   date / number / duration helpers
 ```
 
 ## Data flow
@@ -85,24 +159,58 @@ src/
 ```
 React card ──apiGet()──▶ /api/<card> route handler
                               │
-                        cached(key, fn, ttl)   ◀── in-memory cache
+                        handleRoute()  ── catches GitHubApiError → JSON error
+                              │
+                        cached(key, fn, ttl)   ◀── in-memory cache (5–10 min)
                               │  (miss)
-                        graphqlRequest()  ──▶  api.github.com/graphql
+                        graphqlRequest() / restRequest()  ──▶  api.github.com
                               │
                         typed GitHubApiError on any failure
                               ▼
-                    { error: { kind, message } }  ──▶  describeError() in the UI
+              { error: { kind, message } }  ──▶  describeError() in the card
 ```
+
+- **One GraphQL request per card** where possible: multi-repo cards use aliased
+  `repository(...)` fields so N repos cost one round-trip, not N.
+- **Pagination** is handled: repo lists page through every cursor; the high-volume
+  cards (PRs, branches, issues) fetch a bounded newest/oldest slice and report
+  exact totals separately, with a visible "truncated" note.
+
+## Caching & rate limits
+
+GitHub gives you 5,000 GraphQL points/hour. GitStream keeps well under that:
+
+- Every query result is cached in-memory (`src/lib/github/cache.ts`) for 3–10
+  minutes depending on how fast the data moves (PRs: 3 min, branches: 10 min).
+- Concurrent identical requests share one in-flight promise (no thundering herd
+  on a cold cache).
+- **Refresh all** (`POST /api/cache/clear`) drops the cache so a manual refresh
+  really does re-hit GitHub.
+- The status bar shows your remaining budget and turns amber under 10%.
+
+The cache is per-process and non-durable — fine for a single-user dashboard.
+For a multi-instance deployment, swap `cache.ts` for Redis or `unstable_cache`.
 
 ## Error handling
 
-Every failure mode surfaces as a visible message, never a blank card:
+Every failure surfaces as a visible message, never a silent failure or a crash:
 
-| Situation | `kind` | HTTP |
-| --- | --- | --- |
-| `GITHUB_TOKEN` unset | `MISSING_TOKEN` | 401 |
-| Token expired / wrong scopes | `BAD_CREDENTIALS` | 401 |
-| Rate limit / abuse limit | `RATE_LIMITED` | 429 |
-| Org / repo doesn't exist | `NOT_FOUND` | 404 |
-| GraphQL query error | `GRAPHQL` | 500 |
-| Network failure | `NETWORK` | 502 |
+| Situation | `kind` | HTTP | UI |
+|---|---|---|---|
+| `GITHUB_TOKEN` unset | `MISSING_TOKEN` | 401 | Full-width setup banner |
+| Token expired / wrong scopes | `BAD_CREDENTIALS` | 401 | Full-width setup banner |
+| Primary/secondary rate limit | `RATE_LIMITED` | 429 | Card error w/ reset time |
+| Org / repo not found | `NOT_FOUND` | 404 | Card error ("check the name") |
+| Query too expensive (GitHub 502) | `NETWORK` | 502 | "select fewer repos" |
+| GraphQL query error | `GRAPHQL` | 500 | Card error w/ message |
+| Render/runtime bug | — | — | `app/error.tsx` boundary |
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Setup banner: "token not working" | Check `.env.local` has `GITHUB_TOKEN=`, the token isn't expired, and it has `repo` + `read:org`. Restart `npm run dev` after editing env. |
+| Org loads no repos | The token can't see the org's repos — needs `read:org` (classic) or org membership (fine-grained). |
+| "still computing stats" on commit/contributor cards | GitHub computes those async on first request for a repo. Wait ~10s and hit **Refresh all**. |
+| PR / issue counts look huge | Public repos with lots of drive-by PRs/issues. The totals are exact; the sampled parts are flagged. |
+| Rate limit hit | Wait for the reset shown in the status bar, or select fewer repos. Caching means normal use won't get close. |

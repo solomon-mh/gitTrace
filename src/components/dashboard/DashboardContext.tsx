@@ -57,7 +57,7 @@ interface DashboardApi extends DashboardState {
   clearSelection: () => void;
   setWindowWeeks: (n: number) => void;
   setStaleDays: (n: number) => void;
-  refreshAll: () => void;
+  refreshAll: () => void | Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardApi | null>(null);
@@ -109,22 +109,46 @@ export function DashboardProvider({
   const selectionTouched = useRef(false);
   const hydrated = useRef(false);
 
-  // --- hydrate from localStorage (once) -----------------------------------
+  // --- hydrate: URL query params > localStorage > default-org env ---------
+  // URL params win so a dashboard view can be shared as a link:
+  //   /?org=vercel&weeks=26&staleDays=60
+  //   /?repos=vercel/next.js,facebook/react
   useEffect(() => {
+    const url = new URLSearchParams(window.location.search);
+    const urlOrg = url.get("org")?.trim();
+    const urlRepos = url.get("repos")?.trim();
+    const urlWeeks = Number(url.get("weeks"));
+    const urlStale = Number(url.get("staleDays"));
+
     const p = loadPersisted();
-    if (p) {
-      if (p.selected?.length) {
-        setSelectedState(p.selected);
-        selectionTouched.current = true;
-      }
-      if (p.windowWeeks) setWindowWeeksState(p.windowWeeks);
-      if (p.staleDays) setStaleDaysState(p.staleDays);
-      if (p.source) {
-        setSource(p.source);
-      }
+
+    if (p?.selected?.length) {
+      setSelectedState(p.selected);
+      selectionTouched.current = true;
+    }
+    setWindowWeeksState(
+      Number.isFinite(urlWeeks) && urlWeeks > 0
+        ? urlWeeks
+        : (p?.windowWeeks ?? 12),
+    );
+    setStaleDaysState(
+      Number.isFinite(urlStale) && urlStale > 0
+        ? urlStale
+        : (p?.staleDays ?? 30),
+    );
+
+    if (urlOrg) {
+      setSource({ type: "org", value: urlOrg });
+      selectionTouched.current = false;
+    } else if (urlRepos) {
+      setSource({ type: "repos", value: urlRepos.split(",").map((s) => s.trim()) });
+      selectionTouched.current = false;
+    } else if (p?.source) {
+      setSource(p.source);
     } else if (defaultOrg) {
       setSource({ type: "org", value: defaultOrg });
     }
+
     hydrated.current = true;
   }, [defaultOrg]);
 
@@ -213,7 +237,19 @@ export function DashboardProvider({
     setSelectedState([]);
   }, []);
 
-  const refreshAll = useCallback(() => setRefreshNonce((n) => n + 1), []);
+  /**
+   * Clear the server's in-memory cache, then bump the nonce so every card
+   * refetches. Without the clear, a "refresh" within a card's TTL would just
+   * replay cached data.
+   */
+  const refreshAll = useCallback(async () => {
+    try {
+      await fetch("/api/cache/clear", { method: "POST" });
+    } catch {
+      /* refetch anyway — worst case cards show cached data */
+    }
+    setRefreshNonce((n) => n + 1);
+  }, []);
 
   const selectedRepos = useMemo(
     () => repos.filter((r) => selected.includes(r.nameWithOwner)),
