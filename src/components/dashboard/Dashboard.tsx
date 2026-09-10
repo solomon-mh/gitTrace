@@ -7,6 +7,7 @@ import { CommitActivityCard } from "./cards/CommitActivityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
 import { StaleBranchesCard } from "./cards/StaleBranchesCard";
 import { ContributorActivityCard } from "./cards/ContributorActivityCard";
+import { IssueVelocityCard } from "./cards/IssueVelocityCard";
 
 /**
  * The dashboard shell.
@@ -42,19 +43,10 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
             <PrHealthCard />
             <StaleBranchesCard />
             <ContributorActivityCard />
-            <PlaceholderCard step={7} name="Issue velocity" />
+            <IssueVelocityCard />
           </div>
         </div>
       </div>
     </DashboardProvider>
-  );
-}
-
-function PlaceholderCard({ step, name }: { step: number; name: string }) {
-  return (
-    <div className="flex min-h-[160px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/50 p-5 text-center">
-      <p className="text-sm font-medium text-slate-500">{name}</p>
-      <p className="mt-1 text-xs text-slate-400">Build step {step}</p>
-    </div>
   );
 }
