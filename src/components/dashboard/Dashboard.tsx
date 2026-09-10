@@ -6,6 +6,7 @@ import { RepoSelector } from "./RepoSelector";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
 import { StaleBranchesCard } from "./cards/StaleBranchesCard";
+import { ContributorActivityCard } from "./cards/ContributorActivityCard";
 
 /**
  * The dashboard shell.
@@ -40,7 +41,7 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
             <CommitActivityCard />
             <PrHealthCard />
             <StaleBranchesCard />
-            <PlaceholderCard step={6} name="Contributor activity" />
+            <ContributorActivityCard />
             <PlaceholderCard step={7} name="Issue velocity" />
           </div>
         </div>
