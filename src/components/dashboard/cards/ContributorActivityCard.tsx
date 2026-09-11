@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
-import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
+import { BlockedState, EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { useDashboard } from "@/components/dashboard/DashboardContext";
 import { useCardData, reposQuery } from "@/components/dashboard/useCardData";
 import { shortRepo } from "@/lib/chart";
@@ -73,6 +73,7 @@ export function ContributorActivityCard() {
         </div>
       }
     >
+      {status === "blocked" && <BlockedState />}
       {status === "empty" && (
         <EmptyState
           title="No repositories selected"

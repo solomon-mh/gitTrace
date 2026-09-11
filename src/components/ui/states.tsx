@@ -44,6 +44,25 @@ export function EmptyState({
   );
 }
 
+/**
+ * Shown instead of ErrorState when the *token itself* is broken — every card
+ * would otherwise render its own copy of the same "token rejected" message.
+ * One explanation lives in the banner at the top of the page; every card just
+ * points at it.
+ */
+export function BlockedState() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-surface-2 px-4 py-8 text-center">
+      <p className="text-sm font-medium text-ink-muted">
+        Waiting on your GitHub token
+      </p>
+      <p className="mt-1 text-xs text-ink-subtle">
+        See the notice at the top of the page.
+      </p>
+    </div>
+  );
+}
+
 export function ErrorState({
   message,
   onRetry,

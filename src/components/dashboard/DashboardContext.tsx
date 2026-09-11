@@ -9,8 +9,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { apiGet, describeError } from "@/lib/api/client";
+import { ApiError, apiGet, describeError } from "@/lib/api/client";
 import type { Repo, RepoListResult } from "@/lib/github/types";
+import type { VerifyResult } from "@/lib/github/queries/verify";
+
+export type VerifyState =
+  | { state: "loading" }
+  | { state: "error"; message: string; kind: string }
+  | { state: "ok"; data: VerifyResult };
 
 /**
  * Dashboard-wide state shared by every card:
@@ -45,6 +51,12 @@ interface DashboardState {
   staleDays: number;
   /** Bump to force every card to refetch. */
   refreshNonce: number;
+  /**
+   * The one shared `/api/verify` result — who we're authed as, rate limit,
+   * token scopes. Fetched once here (not per-component) so every card can gate
+   * on it without firing its own redundant, independently-racing request.
+   */
+  verify: VerifyState;
 }
 
 interface DashboardApi extends DashboardState {
@@ -107,6 +119,28 @@ export function DashboardProvider({
   const [windowWeeks, setWindowWeeksState] = useState(12);
   const [staleDays, setStaleDaysState] = useState(30);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [verify, setVerify] = useState<VerifyState>({ state: "loading" });
+
+  // One shared auth check for the whole tree — every card gates on this
+  // instead of each firing its own `/api/verify` (which used to race and, on a
+  // broken token, hammer GitHub with N parallel doomed requests).
+  useEffect(() => {
+    let cancelled = false;
+    setVerify({ state: "loading" });
+    apiGet<VerifyResult>("/api/verify")
+      .then((data) => !cancelled && setVerify({ state: "ok", data }))
+      .catch((err) => {
+        if (cancelled) return;
+        setVerify({
+          state: "error",
+          message: describeError(err),
+          kind: err instanceof ApiError ? err.kind : "UNKNOWN",
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshNonce]);
 
   // Track whether the current selection was set by the user, so that reloading
   // a repo list doesn't stomp an explicit choice.
@@ -296,6 +330,7 @@ export function DashboardProvider({
     windowWeeks,
     staleDays,
     refreshNonce,
+    verify,
     selectedRepos,
     loadViewerRepos,
     loadOrg,

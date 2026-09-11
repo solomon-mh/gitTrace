@@ -52,7 +52,12 @@ export function TopBar() {
           <span className="text-ink-subtle">connecting…</span>
         )}
         {info.state === "error" && (
-          <span className="font-medium text-danger">{info.message}</span>
+          // Full detail lives in the ScopeHint banner below — this stays a
+          // terse status pill so the message isn't repeated at the top too.
+          <span className="flex items-center gap-1.5 font-medium text-danger">
+            <span className="h-1.5 w-1.5 rounded-full bg-danger" />
+            not connected
+          </span>
         )}
         {info.state === "ok" && (
           <span className="hidden items-center gap-2 sm:flex">

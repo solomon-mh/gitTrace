@@ -37,13 +37,10 @@ export interface VerifyResult {
   }>;
 }
 
-interface VerifyQueryResponse {
+interface CoreQueryResponse {
   viewer: {
     login: string;
     name: string | null;
-    organizations: {
-      nodes: Array<{ login: string; name: string | null }>;
-    };
     repositories: {
       nodes: Array<{
         nameWithOwner: string;
@@ -59,17 +56,15 @@ interface VerifyQueryResponse {
   };
 }
 
-const VERIFY_QUERY = /* GraphQL */ `
+// Identity + rate limit + a repo sample. Deliberately does NOT touch
+// `organizations` — that field 403s the *entire* query when the token lacks
+// `read:org`, which would take down the whole auth check over one missing
+// scope. It's fetched separately and treated as best-effort below.
+const CORE_QUERY = /* GraphQL */ `
   query VerifyToken {
     viewer {
       login
       name
-      organizations(first: 100) {
-        nodes {
-          login
-          name
-        }
-      }
       repositories(
         first: 10
         orderBy: { field: PUSHED_AT, direction: DESC }
@@ -89,6 +84,39 @@ const VERIFY_QUERY = /* GraphQL */ `
     }
   }
 `;
+
+interface OrgsQueryResponse {
+  viewer: {
+    organizations: {
+      nodes: Array<{ login: string; name: string | null }>;
+    };
+  };
+}
+
+const ORGS_QUERY = /* GraphQL */ `
+  query VerifyOrgs {
+    viewer {
+      organizations(first: 100) {
+        nodes {
+          login
+          name
+        }
+      }
+    }
+  }
+`;
+
+/** Best-effort: a token without `read:org` gets `[]`, not a thrown error. */
+async function fetchOrganizations(): Promise<
+  VerifyResult["organizations"]
+> {
+  try {
+    const data = await graphqlRequest<OrgsQueryResponse>(ORGS_QUERY);
+    return data.viewer.organizations.nodes;
+  } catch {
+    return [];
+  }
+}
 
 /**
  * GitHub returns a classic PAT's scopes in the `x-oauth-scopes` response header
@@ -122,8 +150,9 @@ export async function verifyToken(): Promise<VerifyResult> {
   return cached(
     "verify:viewer",
     async () => {
-      const [data, scopes] = await Promise.all([
-        graphqlRequest<VerifyQueryResponse>(VERIFY_QUERY),
+      const [core, organizations, scopes] = await Promise.all([
+        graphqlRequest<CoreQueryResponse>(CORE_QUERY),
+        fetchOrganizations(),
         fetchTokenScopes(),
       ]);
 
@@ -136,14 +165,14 @@ export async function verifyToken(): Promise<VerifyResult> {
           : scopes.includes("read:org") || scopes.includes("admin:org");
 
       return {
-        login: data.viewer.login,
-        name: data.viewer.name,
-        rateLimit: data.rateLimit,
+        login: core.viewer.login,
+        name: core.viewer.name,
+        rateLimit: core.rateLimit,
         tokenScopes: scopes,
         canReadPrivate,
         canReadOrgs,
-        organizations: data.viewer.organizations.nodes,
-        repos: data.viewer.repositories.nodes,
+        organizations,
+        repos: core.viewer.repositories.nodes,
       };
     },
     60 * 1000, // short TTL — this is a health check, not dashboard data

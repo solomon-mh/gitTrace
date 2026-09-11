@@ -37,6 +37,9 @@ export function RepoSidebar() {
     verify.state === "ok" ? verify.data.organizations : [];
   const viewerLogin =
     verify.state === "ok" ? verify.data.login : null;
+  const authBlocked =
+    verify.state === "error" &&
+    (verify.kind === "MISSING_TOKEN" || verify.kind === "BAD_CREDENTIALS");
 
   const [mode, setMode] = useState<Mode>(source?.type ?? "viewer");
   const [orgInput, setOrgInput] = useState(
@@ -225,9 +228,16 @@ export function RepoSidebar() {
       {/* repo list */}
       <div className="flex min-h-0 flex-1 flex-col p-4">
         {reposStatus.state === "loading" && <SkeletonRows rows={6} />}
-        {reposStatus.state === "error" && (
-          <ErrorState message={reposStatus.message} onRetry={clearSource} />
-        )}
+        {reposStatus.state === "error" &&
+          (authBlocked ? (
+            // The token itself is the problem — full explanation is the one
+            // banner up top, not repeated here.
+            <p className="rounded-lg border border-dashed border-border bg-surface-2 px-3 py-6 text-center text-xs text-ink-subtle">
+              Fix the token notice above to load repositories.
+            </p>
+          ) : (
+            <ErrorState message={reposStatus.message} onRetry={clearSource} />
+          ))}
         {reposStatus.state === "idle" && (
           <EmptyState
             title="No repositories loaded"
