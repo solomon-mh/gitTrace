@@ -1,4 +1,4 @@
-import { restRequest } from "@/lib/github/client";
+import { restRequestStatus } from "@/lib/github/client";
 import { cached } from "@/lib/github/cache";
 
 /**
@@ -10,10 +10,12 @@ import { cached } from "@/lib/github/cache";
  * GraphQL has no weekly-histogram equivalent, and this endpoint is pre-computed
  * and cached by GitHub, so it's one cheap call per repo.
  *
- * Caveat: on a cold cache GitHub replies 202 (still computing) with an empty
- * body. We retry a few times, then report the repo as "pending" so the UI can
- * say "GitHub is still crunching this — refresh shortly" instead of showing a
- * misleading zero.
+ * Caveat: on a cold cache GitHub replies **202** (still computing) with an empty
+ * body — we retry a few times, then report the repo as "pending". A **200**
+ * with an empty array is a different, permanent thing: a repo quiet/small
+ * enough that GitHub has nothing to report (e.g. genuinely zero commits in the
+ * window). Treating that as "pending" would retry forever and show "still
+ * computing" on every load, which is exactly the bug this distinction avoids.
  */
 
 interface WeekBucket {
@@ -56,9 +58,10 @@ async function fetchRepoActivity(
   const path = `/repos/${owner}/${name}/stats/commit_activity`;
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const data = await restRequest<WeekBucket[]>(path);
-    if (Array.isArray(data) && data.length > 0) return data;
-    // restRequest maps 202 -> []. Wait and retry.
+    const { status, data } = await restRequestStatus<WeekBucket[]>(path);
+    // A real 200 is done, even if the array is empty — that just means no
+    // commits in the window. Only a 202 means "come back in a bit".
+    if (status === 200) return Array.isArray(data) ? data : [];
     await sleep(1500 * (attempt + 1));
   }
   return "pending";

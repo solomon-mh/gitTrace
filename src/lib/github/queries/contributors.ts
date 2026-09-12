@@ -1,4 +1,4 @@
-import { restRequest } from "@/lib/github/client";
+import { restRequestStatus } from "@/lib/github/client";
 import { cached } from "@/lib/github/cache";
 
 /**
@@ -8,7 +8,9 @@ import { cached } from "@/lib/github/cache";
  * every contributor with a 52-week breakdown of commits (`weeks[].c`). We sum
  * each contributor's commits over the last N weeks. Like the other stats
  * endpoints it can 202 ("still computing") on a cold cache — we retry, then
- * report the repo as `pending`.
+ * report the repo as `pending`. A **200** with an empty array is different and
+ * permanent (nobody has committed, so there's nothing to compute) — treating it
+ * as "pending" would retry forever and show "still computing" on every load.
  *
  * Bus-factor flag: a repo is flagged when its top contributor authored more than
  * `BUS_FACTOR_SHARE` of the window's commits AND there were enough commits for
@@ -83,8 +85,8 @@ async function fetchRepoContributors(
   const [owner, name] = repo.split("/");
   const path = `/repos/${owner}/${name}/stats/contributors`;
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const data = await restRequest<ContributorStats[]>(path);
-    if (Array.isArray(data) && data.length > 0) return data;
+    const { status, data } = await restRequestStatus<ContributorStats[]>(path);
+    if (status === 200) return Array.isArray(data) ? data : [];
     await sleep(1500 * (attempt + 1));
   }
   return "pending";

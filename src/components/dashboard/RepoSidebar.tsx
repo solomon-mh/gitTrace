@@ -161,7 +161,14 @@ export function RepoSidebar() {
               <button
                 key={m}
                 type="button"
-                onClick={() => setMode(m)}
+                onClick={() => {
+                  setMode(m);
+                  // "Mine" needs no input, so switching to it should just load
+                  // — otherwise the tab looks selected while the list below
+                  // keeps showing whatever the previous source was, until Load
+                  // is clicked. Org/List still need a value typed in first.
+                  if (m === "viewer") loadViewerRepos();
+                }}
                 className={`rounded-md px-2 py-1.5 ${
                   mode === m
                     ? "bg-accent/15 text-accent"
@@ -250,6 +257,12 @@ export function RepoSidebar() {
 
         {reposStatus.state === "ok" && repos.length > 0 && (
           <>
+            {mode !== source?.type && (
+              <p className="mb-2 rounded-md bg-warn/10 px-2 py-1.5 text-[11px] text-warn">
+                Showing {activeLabel?.toLowerCase()} — press Load to switch to{" "}
+                {mode === "viewer" ? "your repos" : mode === "org" ? "an org" : "a list"}.
+              </p>
+            )}
             <div className="mb-2 flex items-center gap-1.5">
               <input
                 value={filter}

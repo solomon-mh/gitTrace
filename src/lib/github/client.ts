@@ -152,8 +152,15 @@ export async function graphqlRequest<T>(
  * Minimal REST helper. We only use REST where GraphQL has no equivalent — the
  * statistics endpoints for commit-activity histograms and contributor totals,
  * which GitHub never exposed in GraphQL.
+ *
+ * Returns the HTTP status alongside the body so callers can tell a genuine
+ * "202 still computing" apart from a real "200 with nothing to report" (e.g. a
+ * repo too small/quiet for GitHub to ever bother computing stats for) — both
+ * decode to an empty array, but only the first one is worth retrying.
  */
-export async function restRequest<T>(path: string): Promise<T> {
+export async function restRequestStatus<T>(
+  path: string,
+): Promise<{ status: number; data: T }> {
   const token = getToken();
   const url = path.startsWith("http") ? path : `${GITHUB_REST_URL}${path}`;
 
@@ -190,13 +197,19 @@ export async function restRequest<T>(path: string): Promise<T> {
   if (res.status === 404) {
     throw new GitHubApiError("NOT_FOUND", `GitHub resource not found: ${path}`);
   }
-  // 202 = GitHub is still computing the stats. Caller should retry shortly.
+  // 202 = GitHub is still computing the stats. Caller decides whether/how to retry.
   if (res.status === 202) {
-    return [] as unknown as T;
+    return { status: 202, data: [] as unknown as T };
   }
   if (!res.ok) {
     throw new GitHubApiError("UNKNOWN", `GitHub returned HTTP ${res.status}.`);
   }
 
-  return (await res.json()) as T;
+  const data = (await res.json()) as T;
+  return { status: res.status, data };
+}
+
+/** Convenience wrapper for callers that don't care about 202 vs 200. */
+export async function restRequest<T>(path: string): Promise<T> {
+  return (await restRequestStatus<T>(path)).data;
 }

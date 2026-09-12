@@ -108,8 +108,10 @@ function ContributorBody({ data }: { data: ContributorsResult }) {
     <div className="space-y-5">
       {data.pending.length > 0 && (
         <p className="rounded-md bg-warn/10 px-3 py-1.5 text-xs text-warn">
-          GitHub is still computing contributor stats for{" "}
-          {data.pending.map(shortRepo).join(", ")} — hit “Refresh all” shortly.
+          GitHub is computing contributor stats for{" "}
+          {data.pending.map(shortRepo).join(", ")} — this runs on GitHub's side
+          and can take a few minutes for a repo with a lot of history. Try
+          “Refresh” again shortly; it's not something reloading faster fixes.
         </p>
       )}
       {active.map((repo) => (

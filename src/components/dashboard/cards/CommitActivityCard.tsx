@@ -170,8 +170,9 @@ function CommitActivityBody({
     <div>
       {data.pending.length > 0 && (
         <p className="mb-2 rounded-md bg-warn/10 px-3 py-1.5 text-xs text-warn">
-          GitHub is still computing stats for {data.pending.length} repo(s) —
-          hit “Refresh all” in a moment: {data.pending.map(shortRepo).join(", ")}
+          GitHub is computing stats for {data.pending.length} repo(s) — this
+          runs on GitHub's side and can take a few minutes for a repo with a
+          lot of history: {data.pending.map(shortRepo).join(", ")}
         </p>
       )}
 
