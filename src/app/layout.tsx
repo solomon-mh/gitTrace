@@ -27,7 +27,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GitStream — GitHub org health, at a glance",
+  title: "gitStream — GitHub org health, at a glance",
   description:
     "One screen for org repo health: commit flow, PR age, stale branches, contributor concentration, issue velocity.",
 };

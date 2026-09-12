@@ -131,7 +131,7 @@ async function fetchTokenScopes(): Promise<string[] | null> {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github+json",
-        "User-Agent": "GitStream-Dashboard",
+        "User-Agent": "gitStream-Dashboard",
       },
       cache: "no-store",
     });

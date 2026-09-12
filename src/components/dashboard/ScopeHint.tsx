@@ -3,7 +3,7 @@
 import { useVerify } from "./useVerify";
 
 /**
- * Explains why private repos / org repos might be missing. GitStream never
+ * Explains why private repos / org repos might be missing. gitStream never
  * filters by visibility — it's always a token-permission issue — so this banner
  * is the honest answer to "where are my repos?". Only renders when something is
  * actually restricted (or the token is outright broken).

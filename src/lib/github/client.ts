@@ -61,7 +61,7 @@ export async function graphqlRequest<T>(
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         // Recommended by GitHub so they can contact us about abusive queries.
-        "User-Agent": "GitStream-Dashboard",
+        "User-Agent": "gitStream-Dashboard",
       },
       body: JSON.stringify({ query, variables }),
       // We do our own caching; never let fetch serve a stale response here.
@@ -171,7 +171,7 @@ export async function restRequestStatus<T>(
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "GitStream-Dashboard",
+        "User-Agent": "gitStream-Dashboard",
       },
       cache: "no-store",
     });

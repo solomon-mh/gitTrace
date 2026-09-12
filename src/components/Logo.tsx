@@ -1,9 +1,10 @@
 /**
- * GitStream brand mark.
+ * gitStream brand mark.
  *
- * Three flowing currents (a stream) with a commit node riding the middle one
- * (git). Reads as moving water + a commit graph at once, and stays legible at
- * favicon size.
+ * A hex badge framing a single commit line: three diamonds growing in size
+ * as they climb toward the head commit, on one straight diagonal stroke.
+ * All angles, no curves — the git graph is the mark, the diagonal is the
+ * "stream".
  */
 
 export function LogoMark({
@@ -23,35 +24,37 @@ export function LogoMark({
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="gs-flow" x1="2" y1="16" x2="30" y2="16">
+        <linearGradient
+          id="gs-flow"
+          x1="9"
+          y1="22"
+          x2="23"
+          y2="10"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor="rgb(var(--accent))" />
           <stop offset="1" stopColor="rgb(var(--ok))" />
         </linearGradient>
       </defs>
-      {/* three currents */}
+      {/* hex badge frame */}
       <path
-        d="M3 9c4-3 7 3 11 0s7-3 8 0"
-        stroke="rgb(var(--accent))"
-        strokeOpacity="0.5"
-        strokeWidth="2.6"
-        strokeLinecap="round"
+        d="M16 3L27.3 9.5L27.3 22.5L16 29L4.7 22.5L4.7 9.5Z"
+        fill="rgb(var(--canvas))"
+        stroke="rgb(var(--ink-muted))"
+        strokeOpacity="0.4"
+        strokeWidth="1.4"
       />
+      {/* one commit line, climbing toward the head */}
       <path
-        d="M4 16c4.5-3.5 8 3.5 12.5 0S25 12.5 29 16"
+        d="M10 21.5L22 10.5"
         stroke="url(#gs-flow)"
-        strokeWidth="3"
+        strokeWidth="1.8"
         strokeLinecap="round"
       />
-      <path
-        d="M6 23c4-3 7 3 11 0s7-3 8 0"
-        stroke="rgb(var(--accent))"
-        strokeOpacity="0.5"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-      {/* commit node on the main current */}
-      <circle cx="16.5" cy="16" r="3.4" fill="rgb(var(--canvas))" />
-      <circle cx="16.5" cy="16" r="2.6" fill="rgb(var(--accent))" />
+      {/* three commits, growing toward the head */}
+      <path d="M10 19.7L11.8 21.5L10 23.3L8.2 21.5Z" fill="url(#gs-flow)" />
+      <path d="M16 13.3L18.3 16L16 18.7L13.7 16Z" fill="url(#gs-flow)" />
+      <path d="M22 8.5L25 10.5L22 12.5L19 10.5Z" fill="url(#gs-flow)" />
     </svg>
   );
 }
@@ -61,7 +64,7 @@ export function Logo({ className = "" }: { className?: string }) {
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <LogoMark size={22} />
       <span className="font-display text-[15px] font-semibold tracking-tight">
-        <span className="text-ink-muted">Git</span>
+        <span className="text-ink-muted">git</span>
         <span className="text-ink">Stream</span>
       </span>
     </span>
