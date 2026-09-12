@@ -78,7 +78,7 @@ interface DashboardApi extends DashboardState {
 
 const DashboardContext = createContext<DashboardApi | null>(null);
 
-const STORAGE_KEY = "gitstream:v1";
+const STORAGE_KEY = "gittrail:v1";
 
 interface Persisted {
   source: RepoSource | null;

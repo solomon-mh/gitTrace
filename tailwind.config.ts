@@ -1,10 +1,10 @@
 import type { Config } from "tailwindcss";
 
 /**
- * GitStream uses a semantic colour system (not raw slate/gray classes) so the
+ * gitTrail uses a semantic colour system (not raw slate/gray classes) so the
  * whole app is themed from one place. Tokens are defined as space-separated RGB
  * channels in globals.css, which lets Tailwind's `/opacity` modifier work
- * (e.g. `bg-danger/10`). GitStream ships dark by default; `:root.light` in
+ * (e.g. `bg-danger/10`). gitTrail ships dark by default; `:root.light` in
  * globals.css swaps every token.
  */
 const withAlpha = (v: string) => `rgb(var(${v}) / <alpha-value>)`;

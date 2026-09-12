@@ -1,7 +1,7 @@
 /**
  * Shared data shapes used by both the query layer and the UI.
  *
- * These are the *normalised* shapes gitStream works with — not raw GraphQL
+ * These are the *normalised* shapes gitTrail works with — not raw GraphQL
  * responses. Each query file maps GitHub's response into one of these.
  */
 

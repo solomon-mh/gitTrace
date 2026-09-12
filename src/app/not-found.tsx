@@ -5,7 +5,7 @@ export default function NotFound() {
     <main className="mx-auto max-w-lg px-6 py-24 text-center">
       <h1 className="text-xl font-semibold text-ink">Page not found</h1>
       <p className="mt-2 text-sm text-ink-muted">
-        There&apos;s nothing here. gitStream is a single-page dashboard.
+        There&apos;s nothing here. gitTrail is a single-page dashboard.
       </p>
       <Link
         href="/"

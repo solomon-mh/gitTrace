@@ -1,10 +1,9 @@
 /**
- * gitStream brand mark.
+ * gitTrail brand mark.
  *
- * A hex badge framing a single commit line: three diamonds growing in size
- * as they climb toward the head commit, on one straight diagonal stroke.
- * All angles, no curves — the git graph is the mark, the diagonal is the
- * "stream".
+ * A hex badge framing a switchback path: three trail-blaze squares, growing
+ * in size as they climb the bend toward the head commit. Commit history as a
+ * trail — the blazes are the commits, the bend is the trail winding.
  */
 
 export function LogoMark({
@@ -25,11 +24,11 @@ export function LogoMark({
     >
       <defs>
         <linearGradient
-          id="gs-flow"
+          id="gt-trail"
           x1="9"
           y1="22"
           x2="23"
-          y2="10"
+          y2="9"
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0" stopColor="rgb(var(--accent))" />
@@ -44,17 +43,39 @@ export function LogoMark({
         strokeOpacity="0.4"
         strokeWidth="1.4"
       />
-      {/* one commit line, climbing toward the head */}
+      {/* the trail, winding up toward the head */}
       <path
-        d="M10 21.5L22 10.5"
-        stroke="url(#gs-flow)"
+        d="M10 21.5L13 13L22 10.5"
+        stroke="url(#gt-trail)"
         strokeWidth="1.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {/* three commits, growing toward the head */}
-      <path d="M10 19.7L11.8 21.5L10 23.3L8.2 21.5Z" fill="url(#gs-flow)" />
-      <path d="M16 13.3L18.3 16L16 18.7L13.7 16Z" fill="url(#gs-flow)" />
-      <path d="M22 8.5L25 10.5L22 12.5L19 10.5Z" fill="url(#gs-flow)" />
+      {/* three blazes, growing toward the head */}
+      <rect
+        x="8.4"
+        y="19.9"
+        width="3.2"
+        height="3.2"
+        rx="0.7"
+        fill="url(#gt-trail)"
+      />
+      <rect
+        x="11"
+        y="11"
+        width="4"
+        height="4"
+        rx="0.8"
+        fill="url(#gt-trail)"
+      />
+      <rect
+        x="19.4"
+        y="7.9"
+        width="5.2"
+        height="5.2"
+        rx="1"
+        fill="url(#gt-trail)"
+      />
     </svg>
   );
 }
@@ -65,7 +86,7 @@ export function Logo({ className = "" }: { className?: string }) {
       <LogoMark size={22} />
       <span className="font-display text-[15px] font-semibold tracking-tight">
         <span className="text-ink-muted">git</span>
-        <span className="text-ink">Stream</span>
+        <span className="text-ink">Trail</span>
       </span>
     </span>
   );

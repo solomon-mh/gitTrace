@@ -1,17 +1,17 @@
-# gitStream
+# gitTrail
 
 A single-page dashboard for GitHub **organization health**. It pulls commit
 activity, PR age, stale branches, contributor concentration and issue velocity
 into one screen, so you can tell how your repos are doing without clicking
 through a dozen GitHub tabs.
 
-**Brand:** the mark is two git branches weaving past each other — a braided
-current — with a commit node where they cross. "Git" (branch lanes + commit dot)
-and "stream" (the flowing weave) in one glyph. Type: Space Grotesk for the
-wordmark and headings, Inter for UI, JetBrains Mono for anything numeric.
-Sky-cyan accent — the stream. Dark by default.
+**Brand:** the mark is a hex badge framing a switchback trail — three blazes
+(the commits) growing in size as they climb toward the head. Commit history as
+a trail you follow, not a stream you watch go by. Type: Sora for the wordmark
+and headings, Inter for UI, JetBrains Mono for anything numeric. Sky-to-green
+gradient on the trail only. Dark by default.
 
-![gitStream dashboard](docs/screenshot.png)
+![gitTrail dashboard](docs/screenshot.png)
 
 ## Stack
 
@@ -56,7 +56,7 @@ permissions: *Metadata*, *Contents*, *Pull requests*, *Issues*. For an org
 dashboard, create the token **under that org**. For several orgs, use a classic
 token instead.
 
-> gitStream never hides repos by visibility — private repos appear whenever the
+> gitTrail never hides repos by visibility — private repos appear whenever the
 > token can read them. If they're missing, the status bar tells you which
 > scope/permission is the reason.
 
@@ -159,7 +159,7 @@ src/
     layout.tsx  page.tsx  error.tsx  not-found.tsx
 
   components/
-    Logo.tsx                     brand mark (flowing currents + commit node)
+    Logo.tsx                     brand mark (hex badge + trail blazes)
     dashboard/
       Dashboard.tsx              app shell: sidebar + top bar + card grid
       DashboardContext.tsx       shared state (source, selection, window, refresh)
@@ -212,7 +212,7 @@ React card ──apiGet()──▶ /api/<card> route handler
 
 ## Caching & rate limits
 
-GitHub gives you 5,000 GraphQL points/hour. gitStream keeps well under that:
+GitHub gives you 5,000 GraphQL points/hour. gitTrail keeps well under that:
 
 - Every query result is cached in-memory (`src/lib/github/cache.ts`) for 3–10
   minutes depending on how fast the data moves (PRs: 3 min, branches: 10 min).
