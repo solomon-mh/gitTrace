@@ -3,7 +3,7 @@
  *
  * Palette: the validated categorical order from the data-viz method
  * (blue, orange, aqua, yellow, magenta, green, violet, red), stepped for a DARK
- * surface — gitTrail commits to a single dark look (see globals.css). Hues are
+ * surface — gitTrace commits to a single dark look (see globals.css). Hues are
  * assigned in fixed order and never cycled; a 9th series folds into "Other".
  */
 export const SERIES_COLORS = [

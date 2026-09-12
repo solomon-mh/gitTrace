@@ -104,7 +104,7 @@ export function StaleBranchesCard() {
         <>
           {rows.length === 0 ? (
             <EmptyState
-              title={`No branches idle longer than ${staleDays} days 🎉`}
+              title={`No branches idle longer than ${staleDays} days.`}
               hint="Tick “show all” to see every branch, or lower the threshold."
             />
           ) : (

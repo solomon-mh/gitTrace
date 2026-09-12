@@ -4,7 +4,7 @@
 
 /*
  * Theme tokens as space-separated RGB channels (so Tailwind's `/opacity`
- * modifier works). gitTrail is dark by default (:root). Adding `light` to
+ * modifier works). gitTrace is dark by default (:root). Adding `light` to
  * <html> flips every token — nothing toggles it today, but the switch is
  * one line away.
  *

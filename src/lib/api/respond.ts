@@ -16,7 +16,7 @@ export async function handleRoute<T>(
     if (err instanceof GitHubApiError) {
       return NextResponse.json({ error: err.toJSON() }, { status: err.httpStatus });
     }
-    console.error("[gittrail] unhandled route error:", err);
+    console.error("[gittrace] unhandled route error:", err);
     return NextResponse.json(
       {
         error: {

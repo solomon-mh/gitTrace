@@ -100,6 +100,13 @@ function RateLimit({
   );
 }
 
+/**
+ * A classic PAT commonly carries far more scopes than this dashboard needs
+ * (e.g. `delete_repo`, `admin:enterprise`, `write:packages`) — dumping all of
+ * them inline was unreadable. This shows one compact, honest label instead:
+ * whether the two scopes gitTrace actually reads are present, with the full
+ * list available on hover (native title tooltip) for anyone who wants it.
+ */
 function TokenBadge({ data }: { data: VerifyResult }) {
   if (data.tokenScopes == null) {
     return <span className="text-ink-subtle">fine-grained token</span>;
@@ -107,9 +114,27 @@ function TokenBadge({ data }: { data: VerifyResult }) {
   if (data.tokenScopes.length === 0) {
     return <span className="text-warn">no scopes</span>;
   }
+
+  const hasRepo = data.tokenScopes.includes("repo");
+  const hasOrg =
+    data.tokenScopes.includes("read:org") ||
+    data.tokenScopes.includes("admin:org");
+  const extra = data.tokenScopes.length - (Number(hasRepo) + Number(hasOrg));
+  const title = `Token scopes:\n${data.tokenScopes.join(", ")}`;
+
   return (
-    <span className="font-mono text-ink-subtle">
-      {data.tokenScopes.join(" ")}
+    <span
+      title={title}
+      className={`cursor-help underline decoration-dotted underline-offset-2 ${
+        hasRepo && hasOrg ? "text-ink-subtle" : "text-warn"
+      }`}
+    >
+      {hasRepo && hasOrg
+        ? "repo + org access"
+        : hasRepo
+          ? "repo only, no org"
+          : "missing repo scope"}
+      {extra > 0 && ` · +${extra} more`}
     </span>
   );
 }

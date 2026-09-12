@@ -90,7 +90,7 @@ export function PrHealthCard() {
 
       {status === "ok" && data && data.totalOpen === 0 && (
         <EmptyState
-          title="No open pull requests 🎉"
+          title="No open pull requests."
           hint="Every selected repo has a clear PR queue."
         />
       )}
