@@ -29,7 +29,7 @@ import { cached } from "@/lib/github/cache";
 export interface BranchProtectionSummary {
   repo: string;
   defaultBranch: string | null;
-  /** A protection rule matches the default branch's name/pattern. */
+  /** A classic protection rule OR an active ruleset matches the default branch. */
   isProtected: boolean;
   /** Only meaningful when isProtected — an unprotected branch always allows both. */
   allowsForcePushes: boolean;
@@ -37,6 +37,8 @@ export interface BranchProtectionSummary {
   requiresApprovingReviews: boolean;
   requiredApprovingReviewCount: number;
   isAdminEnforced: boolean;
+  /** Which mechanism supplied the protection — for troubleshooting "why". */
+  source: "classic" | "ruleset" | null;
 }
 
 interface ProtectionRuleNode {
@@ -48,11 +50,53 @@ interface ProtectionRuleNode {
   isAdminEnforced: boolean;
 }
 
+interface RulesetRuleNode {
+  type: string;
+  parameters: { requiredApprovingReviewCount?: number } | null;
+}
+
+interface RulesetNode {
+  enforcement: "ACTIVE" | "EVALUATE" | "DISABLED";
+  target: "BRANCH" | "TAG" | "PUSH" | "REPOSITORY" | null;
+  conditions: {
+    refName: { include: string[]; exclude: string[] } | null;
+  };
+  rules: { nodes: RulesetRuleNode[] };
+}
+
 interface RepoProtectionNode {
   defaultBranchRef: { name: string } | null;
   branchProtectionRules: { nodes: ProtectionRuleNode[] };
+  rulesets: { nodes: RulesetNode[] };
 }
 type ProtectionResponse = Record<string, RepoProtectionNode | null>;
+
+/**
+ * Ruleset ref-name conditions use glob patterns, `refs/heads/...` paths, and
+ * the special tokens `~ALL` / `~DEFAULT_BRANCH` — we're always checking
+ * against the default branch, so both of those count as a match.
+ */
+function refConditionMatches(pattern: string, branch: string): boolean {
+  if (pattern === "~ALL" || pattern === "~DEFAULT_BRANCH") return true;
+  const stripped = pattern.replace(/^refs\/heads\//, "");
+  return patternMatches(stripped, branch);
+}
+
+function findMatchingRuleset(
+  rulesets: RulesetNode[],
+  branch: string,
+): RulesetNode | null {
+  return (
+    rulesets.find((rs) => {
+      if (rs.enforcement !== "ACTIVE" || rs.target !== "BRANCH") return false;
+      const cond = rs.conditions.refName;
+      if (!cond) return false;
+      if (cond.exclude.some((p) => refConditionMatches(p, branch)))
+        return false;
+      return cond.include.some((p) => refConditionMatches(p, branch));
+    }) ?? null
+  );
+}
 
 /** Minimal glob match for branch-protection patterns like "main" or "release/*". */
 function patternMatches(pattern: string, branch: string): boolean {
@@ -85,6 +129,21 @@ async function getBranchProtection(
           isAdminEnforced
         }
       }
+      rulesets(first: 25, targets: [BRANCH]) {
+        nodes {
+          enforcement
+          target
+          conditions { refName { include exclude } }
+          rules(first: 25) {
+            nodes {
+              type
+              parameters {
+                ... on PullRequestParameters { requiredApprovingReviewCount }
+              }
+            }
+          }
+        }
+      }
     }`;
   });
 
@@ -95,22 +154,60 @@ async function getBranchProtection(
   return repos.map((repo, i) => {
     const entry = data[`r${i}`];
     const defaultBranch = entry?.defaultBranchRef?.name ?? null;
-    const rule =
+    const classicRule =
       defaultBranch != null
         ? (entry?.branchProtectionRules.nodes.find((r) =>
             patternMatches(r.pattern, defaultBranch),
           ) ?? null)
         : null;
 
+    if (classicRule != null) {
+      return {
+        repo,
+        defaultBranch,
+        isProtected: true,
+        allowsForcePushes: classicRule.allowsForcePushes,
+        allowsDeletions: classicRule.allowsDeletions,
+        requiresApprovingReviews: classicRule.requiresApprovingReviews,
+        requiredApprovingReviewCount: classicRule.requiredApprovingReviewCount,
+        isAdminEnforced: classicRule.isAdminEnforced,
+        source: "classic" as const,
+      };
+    }
+
+    const ruleset =
+      defaultBranch != null
+        ? findMatchingRuleset(entry?.rulesets.nodes ?? [], defaultBranch)
+        : null;
+
+    if (ruleset != null) {
+      const types = new Set(ruleset.rules.nodes.map((r) => r.type));
+      const prRule = ruleset.rules.nodes.find((r) => r.type === "PULL_REQUEST");
+      const requiredApprovingReviewCount =
+        prRule?.parameters?.requiredApprovingReviewCount ?? 0;
+      return {
+        repo,
+        defaultBranch,
+        isProtected: true,
+        allowsForcePushes: !types.has("NON_FAST_FORWARD"),
+        allowsDeletions: !types.has("DELETION"),
+        requiresApprovingReviews: requiredApprovingReviewCount > 0,
+        requiredApprovingReviewCount,
+        isAdminEnforced: false,
+        source: "ruleset" as const,
+      };
+    }
+
     return {
       repo,
       defaultBranch,
-      isProtected: rule != null,
-      allowsForcePushes: rule ? rule.allowsForcePushes : true,
-      allowsDeletions: rule ? rule.allowsDeletions : true,
-      requiresApprovingReviews: rule?.requiresApprovingReviews ?? false,
-      requiredApprovingReviewCount: rule?.requiredApprovingReviewCount ?? 0,
-      isAdminEnforced: rule?.isAdminEnforced ?? false,
+      isProtected: false,
+      allowsForcePushes: true,
+      allowsDeletions: true,
+      requiresApprovingReviews: false,
+      requiredApprovingReviewCount: 0,
+      isAdminEnforced: false,
+      source: null,
     };
   });
 }

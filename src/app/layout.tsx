@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Sora, JetBrains_Mono } from "next/font/google";
+import { Inter, Chakra_Petch, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 /**
  * Type system:
- *   - Sora           → the wordmark + card / section headings (geometric but
- *     rounder than a pure technical grotesk — a trail marker, not a chip)
+ *   - Chakra Petch   → the wordmark + card / section headings (angular,
+ *     cut-corner technical face — reads like a label on a schematic or a
+ *     traced signal path, not a generic rounded-geometric sans)
  *   - Inter          → body / UI text
  *   - JetBrains Mono  → numbers, repo names, branch names, anything tabular
  */
@@ -14,7 +15,7 @@ const sans = Inter({
   variable: "--font-sans",
   display: "swap",
 });
-const display = Sora({
+const display = Chakra_Petch({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-display",
@@ -27,7 +28,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gitTrail — GitHub org health, at a glance",
+  title: "gitTrace — GitHub org health, at a glance",
   description:
     "One screen for org repo health: commit flow, PR age, stale branches, contributor concentration, issue velocity.",
 };

@@ -1,9 +1,9 @@
 /**
- * gitTrail brand mark.
+ * gitTrace brand mark.
  *
- * A hex badge framing a switchback path: three trail-blaze squares, growing
- * in size as they climb the bend toward the head commit. Commit history as a
- * trail — the blazes are the commits, the bend is the trail winding.
+ * A hex badge framing a traced path: three waypoints, growing in size as the
+ * trace climbs toward the head commit. Commit history as a signal you follow
+ * from origin to HEAD, not a stream you watch go by.
  */
 
 export function LogoMark({
@@ -24,7 +24,7 @@ export function LogoMark({
     >
       <defs>
         <linearGradient
-          id="gt-trail"
+          id="gt-trace"
           x1="9"
           y1="22"
           x2="23"
@@ -43,22 +43,22 @@ export function LogoMark({
         strokeOpacity="0.4"
         strokeWidth="1.4"
       />
-      {/* the trail, winding up toward the head */}
+      {/* the trace, bending up toward the head */}
       <path
         d="M10 21.5L13 13L22 10.5"
-        stroke="url(#gt-trail)"
+        stroke="url(#gt-trace)"
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* three blazes, growing toward the head */}
+      {/* three waypoints, growing toward the head */}
       <rect
         x="8.4"
         y="19.9"
         width="3.2"
         height="3.2"
         rx="0.7"
-        fill="url(#gt-trail)"
+        fill="url(#gt-trace)"
       />
       <rect
         x="11"
@@ -66,7 +66,7 @@ export function LogoMark({
         width="4"
         height="4"
         rx="0.8"
-        fill="url(#gt-trail)"
+        fill="url(#gt-trace)"
       />
       <rect
         x="19.4"
@@ -74,7 +74,7 @@ export function LogoMark({
         width="5.2"
         height="5.2"
         rx="1"
-        fill="url(#gt-trail)"
+        fill="url(#gt-trace)"
       />
     </svg>
   );
@@ -86,7 +86,7 @@ export function Logo({ className = "" }: { className?: string }) {
       <LogoMark size={22} />
       <span className="font-display text-[15px] font-semibold tracking-tight">
         <span className="text-ink-muted">git</span>
-        <span className="text-ink">Trail</span>
+        <span className="text-ink">Trace</span>
       </span>
     </span>
   );
