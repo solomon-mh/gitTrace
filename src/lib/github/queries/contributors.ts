@@ -120,20 +120,46 @@ export async function getContributors(
     }
 
     // Sum each contributor's commits across the last `w` weekly buckets.
-    const tallied = stats
-      .map((s) => {
-        const commits = s.weeks
-          .slice(-w)
-          .reduce((sum, wk) => sum + (wk.c || 0), 0);
-        const login = s.author?.login ?? "(unknown)";
-        return {
-          login,
-          avatarUrl: s.author?.avatar_url ?? null,
+    // GitHub gives every commit author *without* a linked GitHub account the
+    // same `author: null` — distinct people (or the same person under
+    // different local git configs), all indistinguishable to us. Rather than
+    // rendering N confusing rows that all say "(unknown)" (and collide on
+    // React key, since they're otherwise identical), fold them into one bucket.
+    const named: Array<{
+      login: string;
+      avatarUrl: string | null;
+      commits: number;
+      isBot: boolean;
+    }> = [];
+    let unknownCommits = 0;
+
+    for (const s of stats) {
+      const commits = s.weeks
+        .slice(-w)
+        .reduce((sum, wk) => sum + (wk.c || 0), 0);
+      if (commits <= 0) continue;
+      if (s.author?.login) {
+        named.push({
+          login: s.author.login,
+          avatarUrl: s.author.avatar_url,
           commits,
-          isBot: isBot(login),
-        };
-      })
-      .filter((c) => c.commits > 0)
+          isBot: isBot(s.author.login),
+        });
+      } else {
+        unknownCommits += commits;
+      }
+    }
+
+    if (unknownCommits > 0) {
+      named.push({
+        login: "(unknown)",
+        avatarUrl: null,
+        commits: unknownCommits,
+        isBot: false,
+      });
+    }
+
+    const tallied = named
       .filter((c) => !(excludeBots && c.isBot))
       .sort((a, b) => b.commits - a.commits);
 
