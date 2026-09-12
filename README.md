@@ -130,6 +130,7 @@ Deep-link a view:
 | Card | Data | Notes |
 |---|---|---|
 | **Commit activity** | Commits per week, per repo + aggregate, over 4–52 weeks | From REST `stats/commit_activity`. Aggregate = bar chart, per-repo = line chart (top 7 repos, rest folded into "Other"). |
+| **Repo security** | Branch protection status, recent force-pushes, merges with zero approving reviews | Not an audit log — GitHub gates the real one behind Enterprise + org-owner access. This is what a normal token *can* see: whether the default branch is even protected (and whether force-push/deletion is allowed on it), force-pushes from GitHub's public Events feed (best-effort — capped at ~90 days/300 events, so a clean result means "not visible anymore," not "never happened"), and merged PRs with no approving review. On a solo-maintainer repo, self-merges are normal — treat this as a checklist, not a verdict. |
 | **PR health** | Every open PR, oldest first | PRs older than **14 days** get a red badge (7–14d amber). Draft / approved / changes-requested tags. Filter: All / Stale / Ready. Fetches the oldest 50 PRs per repo. |
 | **Stale branches** | Branches with no commits in **30 / 60 / 90 days** (toggle) | Shows last-commit date + author. Default branch is listed but greyed and never counted as "stale". Fetches the 100 stalest branches per repo. |
 | **Contributor activity** | Commits per contributor in the window, as a share of the repo | Repos where one person authored **> 80%** (with ≥ 10 commits) are flagged as a **bus-factor risk**. Bots (`*[bot]`, `actions-user`, …) are hidden by default — toggle "hide bots" off to include them. |
@@ -153,6 +154,7 @@ src/
       branches/route.ts          GET  — branches, stalest-first
       contributors/route.ts      GET  — contributor shares + bus factor
       issues/route.ts            GET  — opened/closed per week + time-to-close
+      security/route.ts          GET  — branch protection, force-pushes, unreviewed merges
       cache/clear/route.ts       POST — drop the in-memory cache ("Refresh all")
     layout.tsx  page.tsx  error.tsx  not-found.tsx
 

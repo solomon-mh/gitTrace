@@ -5,6 +5,7 @@ import { TopBar } from "./TopBar";
 import { ScopeHint } from "./ScopeHint";
 import { RepoSidebar } from "./RepoSidebar";
 import { CommitActivityCard } from "./cards/CommitActivityCard";
+import { SecurityCard } from "./cards/SecurityCard";
 import { PrHealthCard } from "./cards/PrHealthCard";
 import { StaleBranchesCard } from "./cards/StaleBranchesCard";
 import { ContributorActivityCard } from "./cards/ContributorActivityCard";
@@ -35,6 +36,7 @@ export function Dashboard({ defaultOrg }: { defaultOrg?: string }) {
             <ScopeHint />
             <div className="grid gap-4 xl:grid-cols-2">
               <CommitActivityCard />
+              <SecurityCard />
               <PrHealthCard />
               <StaleBranchesCard />
               <ContributorActivityCard />
